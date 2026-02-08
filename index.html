@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pwice - Private Global Connect</title>
-    
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="logo.png" type="image/png">
     
@@ -13,82 +12,95 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
     <style>
-        :root { --pwice-blue: #0095f6; --pwice-dark: #000000; --pwice-card: #121212; --pwice-text: #ffffff; }
-        body { margin: 0; font-family: -apple-system, system-ui, sans-serif; background-color: var(--pwice-dark); color: var(--pwice-text); overflow-x: hidden; }
+        :root { --pw-blue: #0095f6; --pw-dark: #000000; --pw-card: #121212; --pw-text: #ffffff; }
+        body { margin: 0; font-family: sans-serif; background: var(--pw-dark); color: var(--pw-text); overflow: hidden; }
         .hidden { display: none !important; }
-        
+
         /* Navigation */
-        nav { background: var(--pwice-dark); border-bottom: 1px solid #262626; padding: 15px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
-        .logo-text { font-size: 1.8rem; font-weight: bold; background: linear-gradient(to right, #ffffff, #888888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .logo-text { font-size: 1.5rem; font-weight: bold; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* Auth/Login Screen */
-        .auth-container { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
-        .login-card { background: var(--pwice-card); padding: 40px; border-radius: 20px; border: 1px solid #262626; width: 100%; max-width: 350px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: white; box-sizing: border-box; }
-        .btn { width: 100%; padding: 12px; background: var(--pwice-blue); border: none; color: white; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        /* Reels Container (TikTok Style) */
+        .reels-container { height: calc(100vh - 120px); overflow-y: scroll; scroll-snap-type: y mandatory; }
+        .reel-video { height: 100%; width: 100%; scroll-snap-align: start; position: relative; background: #1a1a1a; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #333; }
+        .reel-overlay { position: absolute; bottom: 20px; left: 15px; text-shadow: 1px 1px 5px rgba(0,0,0,0.8); }
+        .reel-actions { position: absolute; right: 15px; bottom: 100px; display: flex; flex-direction: column; gap: 20px; font-size: 1.5rem; }
 
-        /* Feed Screen */
-        .main-content { max-width: 500px; margin: 20px auto; padding-bottom: 80px; }
-        .post-card { background: var(--pwice-card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #262626; overflow: hidden; }
-        .post-header { padding: 12px; font-weight: bold; border-bottom: 1px solid #262626; }
-        .post-content { padding: 15px; }
-        
+        /* Auth/Login */
+        .auth-box { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+        .login-card { background: var(--pw-card); padding: 30px; border-radius: 15px; width: 100%; max-width: 350px; border: 1px solid #262626; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: white; box-sizing: border-box; }
+        .btn-main { width: 100%; padding: 12px; background: var(--pw-blue); border: none; color: white; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
         /* Bottom Nav */
-        .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pwice-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 15px 0; font-size: 1.5rem; }
+        .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pw-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 15px 0; font-size: 1.4rem; z-index: 100; }
+        .active { color: var(--pw-blue); }
     </style>
 </head>
 <body>
 
-<div id="auth-screen" class="auth-container">
+<div id="auth-page" class="auth-box">
     <div class="logo-text" style="font-size: 3rem; margin-bottom: 20px;">Pwice</div>
     <div class="login-card">
-        <h2 style="margin-top: 0;">Secure Entrance</h2>
-        <input type="text" id="user-input" placeholder="Global Username">
-        <input type="password" id="pass-input" placeholder="Encrypted Password">
-        <button class="btn" onclick="enterPwice()">Join the World</button>
-        <p style="font-size: 0.8rem; color: #8e8e8e; margin-top: 20px;">Your data is yours. Period.</p>
+        <input type="text" id="u-name" placeholder="Username">
+        <input type="password" id="u-pass" placeholder="Password">
+        <button class="btn-main" onclick="startApp()">Enter Pwice</button>
+        <p style="font-size: 0.8rem; color: #888; margin-top: 15px;">Global Privacy Protected 🔒</p>
     </div>
 </div>
 
-<div id="app-screen" class="hidden">
+<div id="main-app" class="hidden">
     <nav>
         <div class="logo-text">Pwice</div>
-        <div style="font-size: 1.2rem;">🔔</div>
+        <div>🔔 ✉️</div>
     </nav>
 
-    <div class="main-content">
-        <div class="post-card">
-            <div class="post-header">@Pwice_Global</div>
-            <div class="post-content">Welcome to the future. Your privacy is now global. 🌎🔒</div>
+    <div class="reels-container" id="reels-list">
+        <div class="reel-video">
+            <div style="color: #555;">[Video Content Loading...]</div>
+            <div class="reel-overlay">
+                <div style="font-weight: bold;">@Pwice_Official</div>
+                <div>Welcome to the first Reel! 🎬</div>
+            </div>
+            <div class="reel-actions">
+                <span>❤️</span><span>💬</span><span>🚀</span>
+            </div>
+        </div>
+        <div class="reel-video">
+            <div style="color: #555;">[Entertainment Awaits...]</div>
+            <div class="reel-overlay">
+                <div style="font-weight: bold;">@Ishaan_Pwice</div>
+                <div>Global connect, no data leaks. 🛡️</div>
+            </div>
+            <div class="reel-actions">
+                <span>❤️</span><span>💬</span><span>🚀</span>
+            </div>
         </div>
     </div>
 
     <div class="bottom-bar">
-        <span>🏠</span><span>🔍</span><span>➕</span><span onclick="location.reload()">👤</span>
+        <span class="active">🏠</span>
+        <span>🔍</span>
+        <span style="font-size: 1.8rem;">🎬</span>
+        <span>➕</span>
+        <span onclick="location.reload()">👤</span>
     </div>
 </div>
 
 <script>
-    // Firebase Config (Yahan apni kal wali keys ek baar paste kar dena bhai)
-    const firebaseConfig = {
-        apiKey: "REPLACE_WITH_YOUR_KEY",
-        authDomain: "pwice-app.firebaseapp.com",
-        projectId: "pwice-app",
-        storageBucket: "pwice-app.appspot.com",
-        messagingSenderId: "ID",
-        appId: "APP_ID"
-    };
-
-    // App Logic
-    function enterPwice() {
-        const user = document.getElementById('user-input').value;
+    // Firebase Placeholder (Bhai apni keys yahan zaroor daal dena)
+    const firebaseConfig = { apiKey: "REPLACE_ME" };
+    
+    function startApp() {
+        const user = document.getElementById('u-name').value;
         if(user) {
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('app-screen').classList.remove('hidden');
+            document.getElementById('auth-page').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+        } else {
+            alert("Username enter karein bhai!");
         }
     }
 
-    // PWA & Service Worker
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js');
     }
