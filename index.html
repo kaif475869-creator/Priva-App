@@ -1,81 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Priva - Secure Social App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Priva - Connect Better</title>
     <style>
-        body { background-color: #111827; margin: 0; font-family: sans-serif; color: white; min-height: 100vh; }
-        .card { background-color: #1f2937; padding: 2rem; border-radius: 1.5rem; width: 100%; max-width: 20rem; text-align: center; border: 1px solid #374151; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        input { width: 100%; padding: 0.8rem; margin-bottom: 1rem; background-color: #374151; border-radius: 0.6rem; border: 1px solid #4b5563; color: white; outline: none; box-sizing: border-box; }
-        .btn-primary { width: 100%; background-color: #2563eb; padding: 0.9rem; border-radius: 0.6rem; font-weight: bold; color: white; border: none; cursor: pointer; }
-        #app-interface { display: none; }
-        .nav-bar { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; padding: 15px 0; background: #1f2937; border-top: 1px solid #374151; }
-        .post { background: #1f2937; border-radius: 12px; margin-bottom: 20px; border: 1px solid #374151; overflow: hidden; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            width: 320px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 8px;
+            border: none;
+            background: #2563eb;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover { background: #1d4ed8; }
+        .switch {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+        .switch a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: bold;
+        }
     </style>
 </head>
-<body style="display: flex; align-items: center; justify-content: center;">
+<body>
 
-    <div id="auth-screen" class="card">
-        <h1 style="color: #60a5fa;">Priva</h1>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
-        <button class="btn-primary" onclick="handleLogin()">Login</button>
+<div class="container" id="auth-box">
+    <h1 id="title">Priva</h1>
+    <div id="form-content">
+        <input type="text" placeholder="Phone, username, or email">
+        <input type="password" placeholder="Password">
+        <button onclick="alert('Abhi database connect nahi hai!')">Login</button>
     </div>
-
-    <div id="app-interface" style="width: 100%; min-height: 100vh; position: fixed; top: 0; left: 0; background: #111827;">
-        <nav style="display: flex; justify-content: space-between; padding: 15px; background: #1f2937; border-bottom: 1px solid #374151;">
-            <h2 style="color: #60a5fa; margin: 0;">Priva</h2>
-            <button onclick="location.reload()" style="background:none; border:none; color:#9ca3af;">Logout</button>
-        </nav>
-        <div id="feed" style="padding: 20px; max-width: 500px; margin: auto; padding-bottom: 80px;"></div>
-        <div class="nav-bar">
-            <span>🏠</span><span>🔍</span><span onclick="triggerUpload()" style="cursor:pointer;">➕</span><span>👤</span>
-        </div>
+    
+    <div class="switch" id="toggle-text">
+        Don't have an account? <a href="#" onclick="showSignUp()">Sign Up</a>
     </div>
+</div>
 
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
-        const supabase = createClient('https://xgxmbfbuplkzwnrueusy.supabase.co', 'sb_publishable_W-5nmUs4gRcD0BDsv7BM9w_R6rpx87j7')
+<script>
+    function showSignUp() {
+        document.getElementById('title').innerText = 'Create ID';
+        document.getElementById('form-content').innerHTML = `
+            <input type="text" placeholder="Mobile Number or Email">
+            <input type="text" placeholder="Full Name">
+            <input type="text" placeholder="Username">
+            <input type="password" placeholder="Password">
+            <button onclick="alert('Priva par aapka swagat hai!')">Sign Up</button>
+        `;
+        document.getElementById('toggle-text').innerHTML = `Have an account? <a href="#" onclick="showLogin()">Log In</a>`;
+    }
 
-        window.handleLogin = async () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) return alert(error.message);
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('app-interface').style.display = 'block';
-            loadPosts();
-        };
+    function showLogin() {
+        document.getElementById('title').innerText = 'Priva';
+        document.getElementById('form-content').innerHTML = `
+            <input type="text" placeholder="Phone, username, or email">
+            <input type="password" placeholder="Password">
+            <button onclick="alert('Login checking...')">Login</button>
+        `;
+        document.getElementById('toggle-text').innerHTML = `Don't have an account? <a href="#" onclick="showSignUp()">Sign Up</a>`;
+    }
+</script>
 
-        async function loadPosts() {
-            const { data } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
-            const feed = document.getElementById('feed');
-            feed.innerHTML = data?.map(p => `<div class="post"><img src="${p.image_url}" style="width:100%"><div style="padding:10px">❤️ ${p.likes} Likes</div></div>`).join('') || '<p>No posts yet.</p>';
-        }
-
-        window.triggerUpload = () => {
-            let input = document.createElement('input');
-            input.type = 'file';
-            input.onchange = async e => {
-                const file = e.target.files[0];
-                const fileName = `${Date.now()}_${file.name}`;
-
-                // 1. Storage mein upload karein
-                const { data: uploadData, error: uploadError } = await supabase.storage.from('post-images').upload(fileName, file);
-                if (uploadError) return alert("Upload error: " + uploadError.message);
-
-                // 2. Public URL nikaalein
-                const { data: urlData } = supabase.storage.from('post-images').getPublicUrl(fileName);
-
-                // 3. Database mein entry karein
-                const { error: dbError } = await supabase.from('posts').insert([{ image_url: urlData.publicUrl, user_id: (await supabase.auth.getUser()).data.user.id }]);
-
-                if (dbError) alert(dbError.message);
-                else { alert("Post Successful!"); loadPosts(); }
-            };
-            input.click();
-        };
-    </script>
 </body>
 </html>
