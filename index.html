@@ -3,123 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Priva - Connect Better</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="logo.png" type="image/png">
-    <meta name="theme-color" content="#0f172a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    
+    <title>Pwice - Private Global Connect</title>
     <style>
+        :root {
+            --pwice-blue: #0095f6;
+            --pwice-dark: #000000;
+            --pwice-card: #121212;
+            --pwice-text: #ffffff;
+        }
         body {
             margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f172a, #1e293b);
+            font-family: -apple-system, system-ui, sans-serif;
+            background-color: var(--pwice-dark);
+            color: var(--pwice-text);
+        }
+        .auth-container {
             height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: white;
         }
-        .container {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(15px);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            width: 320px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        h1 {
-            font-size: 2.5rem;
+        .logo {
+            font-size: 3rem;
+            font-weight: bold;
             margin-bottom: 20px;
-            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            letter-spacing: -1px;
+            background: linear-gradient(to right, #ffffff, #888888);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+        }
+        .login-card {
+            background: var(--pwice-card);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid #262626;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
         }
         input {
             width: 100%;
             padding: 12px;
             margin: 10px 0;
+            background: #1a1a1a;
+            border: 1px solid #333;
             border-radius: 8px;
-            border: none;
-            background: rgba(255, 255, 255, 0.1);
             color: white;
             box-sizing: border-box;
         }
-        button {
+        .btn {
             width: 100%;
             padding: 12px;
-            margin-top: 15px;
-            border-radius: 8px;
+            background: var(--pwice-blue);
             border: none;
-            background: #2563eb;
             color: white;
+            border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.3s;
+            margin-top: 10px;
         }
-        button:hover { background: #1d4ed8; }
-        .switch {
+        .privacy-note {
+            font-size: 0.8rem;
+            color: #8e8e8e;
             margin-top: 20px;
-            font-size: 0.9rem;
-            color: #94a3b8;
-        }
-        .switch a {
-            color: #3b82f6;
-            text-decoration: none;
-            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-<div class="container" id="auth-box">
-    <h1 id="title">Priva</h1>
-    <div id="form-content">
-        <input type="text" placeholder="Phone, username, or email">
-        <input type="password" placeholder="Password">
-        <button onclick="alert('Abhi database connect nahi hai!')">Login</button>
-    </div>
-    
-    <div class="switch" id="toggle-text">
-        Don't have an account? <a href="#" onclick="showSignUp()">Sign Up</a>
+<div class="auth-container">
+    <div class="logo">Pwice</div>
+    <div class="login-card">
+        <h2 style="margin-top: 0;">Secure Entrance</h2>
+        <input type="text" placeholder="Global Username / Email">
+        <input type="password" placeholder="Encrypted Password">
+        <button class="btn" onclick="alert('Starting Pwice Secure Session...')">Join the World</button>
+        <p class="privacy-note">Your data is yours. Period.</p>
     </div>
 </div>
-
-<script>
-    // App Registration Script
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('Priva App ready!'))
-            .catch(err => console.log('Error setting up app'));
-        });
-    }
-
-    function showSignUp() {
-        document.getElementById('title').innerText = 'Create ID';
-        document.getElementById('form-content').innerHTML = `
-            <input type="text" placeholder="Mobile Number or Email">
-            <input type="text" placeholder="Full Name">
-            <input type="text" placeholder="Username">
-            <input type="password" placeholder="Password">
-            <button onclick="alert('Priva par aapka swagat hai!')">Sign Up</button>
-        `;
-        document.getElementById('toggle-text').innerHTML = `Have an account? <a href="#" onclick="showLogin()">Log In</a>`;
-    }
-
-    function showLogin() {
-        document.getElementById('title').innerText = 'Priva';
-        document.getElementById('form-content').innerHTML = `
-            <input type="text" placeholder="Phone, username, or email">
-            <input type="password" placeholder="Password">
-            <button onclick="alert('Login checking...')">Login</button>
-        `;
-        document.getElementById('toggle-text').innerHTML = `Don't have an account? <a href="#" onclick="showSignUp()">Sign Up</a>`;
-    }
-</script>
 
 </body>
 </html>
