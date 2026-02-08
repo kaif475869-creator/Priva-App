@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pwice - Create Your ID</title>
+    <title>Pwice - Global Private Connect</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="logo.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -12,89 +12,83 @@
         :root { --pw-blue: #0095f6; --pw-dark: #000000; --pw-card: #121212; --pw-text: #ffffff; }
         body { margin: 0; font-family: sans-serif; background: var(--pw-dark); color: var(--pw-text); overflow-x: hidden; }
         .hidden { display: none !important; }
-
         .auth-box { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
         .login-card { background: var(--pw-card); padding: 30px; border-radius: 15px; width: 100%; max-width: 350px; border: 1px solid #262626; text-align: center; }
         input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: white; box-sizing: border-box; }
         .btn-main { width: 100%; padding: 12px; background: var(--pw-blue); border: none; color: white; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        
         .toggle-text { margin-top: 20px; font-size: 0.9rem; color: #8e8e8e; }
         .toggle-text span { color: var(--pw-blue); cursor: pointer; font-weight: bold; }
-
         .logo-text { font-size: 3rem; font-weight: bold; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; }
-        
-        /* Main App Style */
-        nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; }
-        .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pw-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 15px 0; font-size: 1.4rem; }
+        nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .reels-container { height: calc(100vh - 120px); overflow-y: scroll; scroll-snap-type: y mandatory; }
+        .reel-video { height: 100%; width: 100%; scroll-snap-align: start; position: relative; background: #1a1a1a; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #333; }
+        .reel-overlay { position: absolute; bottom: 20px; left: 15px; text-shadow: 1px 1px 5px rgba(0,0,0,0.8); }
+        .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pw-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 15px 0; font-size: 1.4rem; z-index: 100; }
     </style>
 </head>
 <body>
 
 <div id="auth-page" class="auth-box">
     <div class="logo-text">Pwice</div>
-    
     <div class="login-card">
         <h2 id="form-title">Login</h2>
-        
         <input type="text" id="u-fullname" class="hidden" placeholder="Full Name">
-        
         <input type="text" id="u-contact" placeholder="Mobile Number or Email">
         <input type="password" id="u-pass" placeholder="Password">
-        
         <button class="btn-main" id="auth-btn" onclick="handleAuth()">Login</button>
-        
-        <p class="toggle-text" id="toggle-msg">
-            Don't have an account? <span onclick="toggleForm()">Create Account</span>
-        </p>
+        <p class="toggle-text" id="toggle-msg">Don't have an account? <span onclick="toggleForm()">Create Account</span></p>
     </div>
 </div>
 
 <div id="main-app" class="hidden">
     <nav><div class="logo-text" style="font-size: 1.5rem; margin: 0;">Pwice</div><div>🔔 ✉️</div></nav>
-    <div style="text-align: center; margin-top: 50px;">
-        <h3>Welcome to Pwice!</h3>
-        <p>Your private ID is now active. Global Connect Loading...</p>
+    <div class="reels-container" id="reels-list">
+        <div class="reel-video">
+            <div style="color: #555;">[Reels Loading...]</div>
+            <div class="reel-overlay"><b>@Pwice_Global</b><br>Global connection, private experience. 🌍🔒</div>
+        </div>
     </div>
-    <div class="bottom-bar"><span>🏠</span><span>🔍</span><span>🎬</span><span>➕</span><span onclick="location.reload()">👤</span></div>
+    <div class="bottom-bar"><span>🏠</span><span>🔍</span><span style="font-size: 1.8rem;">🎬</span><span>➕</span><span onclick="location.reload()">👤</span></div>
 </div>
 
 <script>
+    const supabaseUrl = 'https://xgxmbfbuplkzwnrueusy.supabase.co'; 
+    const supabaseKey = 'sb_publishable_W-5nmUs4gRcD0BDsv7BM9w_R6rpx87j'; 
+    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
     let isLogin = true;
 
     function toggleForm() {
         isLogin = !isLogin;
-        const title = document.getElementById('form-title');
-        const btn = document.getElementById('auth-btn');
-        const msg = document.getElementById('toggle-msg');
-        const fullNameInput = document.getElementById('u-fullname');
-
-        if (isLogin) {
-            title.innerText = "Login";
-            btn.innerText = "Login";
-            msg.innerHTML = "Don't have an account? <span onclick='toggleForm()'>Create Account</span>";
-            fullNameInput.classList.add('hidden');
-        } else {
-            title.innerText = "Create Account";
-            btn.innerText = "Sign Up";
-            msg.innerHTML = "Already have an account? <span onclick='toggleForm()'>Login</span>";
-            fullNameInput.classList.remove('hidden');
-        }
+        document.getElementById('form-title').innerText = isLogin ? "Login" : "Create Account";
+        document.getElementById('auth-btn').innerText = isLogin ? "Login" : "Sign Up";
+        document.getElementById('u-fullname').classList.toggle('hidden', isLogin);
+        document.getElementById('toggle-msg').innerHTML = isLogin ? 
+            "Don't have an account? <span onclick='toggleForm()'>Create Account</span>" : 
+            "Already have an account? <span onclick='toggleForm()'>Login</span>";
     }
 
-    function handleAuth() {
+    async function handleAuth() {
+        const fullName = document.getElementById('u-fullname').value;
         const contact = document.getElementById('u-contact').value;
         const pass = document.getElementById('u-pass').value;
 
-        if(contact && pass) {
-            alert(isLogin ? "Logging in..." : "Creating your Pwice ID...");
-            // Supabase Logic yahan connect hoga
-            document.getElementById('auth-page').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
+        if(!contact || !pass) { alert("Sari details bhariye bhai!"); return; }
+
+        if (!isLogin) {
+            const { data, error } = await _supabase.from('Users').insert([{ full_name: fullName, contact: contact, password: pass }]);
+            if (error) { alert("Error: " + error.message); } 
+            else { alert("Pwice ID Ban gayi! 🎉"); loginSuccess(); }
         } else {
-            alert("Sari details bhariye bhai!");
+            const { data, error } = await _supabase.from('Users').select('*').eq('contact', contact).eq('password', pass).single();
+            if (data) { loginSuccess(); } else { alert("Wrong details! Check mobile/password."); }
         }
     }
-</script>
 
+    function loginSuccess() {
+        document.getElementById('auth-page').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+    }
+</script>
 </body>
 </html>
