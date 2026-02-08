@@ -4,84 +4,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pwice - Private Global Connect</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="logo.png" type="image/png">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
     <style>
-        :root {
-            --pwice-blue: #0095f6;
-            --pwice-dark: #000000;
-            --pwice-card: #121212;
-            --pwice-text: #ffffff;
-        }
-        body {
-            margin: 0;
-            font-family: -apple-system, system-ui, sans-serif;
-            background-color: var(--pwice-dark);
-            color: var(--pwice-text);
-        }
-        .auth-container {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .logo {
-            font-size: 3rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            letter-spacing: -1px;
-            background: linear-gradient(to right, #ffffff, #888888);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .login-card {
-            background: var(--pwice-card);
-            padding: 40px;
-            border-radius: 20px;
-            border: 1px solid #262626;
-            width: 100%;
-            max-width: 350px;
-            text-align: center;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            color: white;
-            box-sizing: border-box;
-        }
-        .btn {
-            width: 100%;
-            padding: 12px;
-            background: var(--pwice-blue);
-            border: none;
-            color: white;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .privacy-note {
-            font-size: 0.8rem;
-            color: #8e8e8e;
-            margin-top: 20px;
-        }
+        :root { --pwice-blue: #0095f6; --pwice-dark: #000000; --pwice-card: #121212; --pwice-text: #ffffff; }
+        body { margin: 0; font-family: -apple-system, system-ui, sans-serif; background-color: var(--pwice-dark); color: var(--pwice-text); overflow-x: hidden; }
+        .hidden { display: none !important; }
+        
+        /* Navigation */
+        nav { background: var(--pwice-dark); border-bottom: 1px solid #262626; padding: 15px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+        .logo-text { font-size: 1.8rem; font-weight: bold; background: linear-gradient(to right, #ffffff, #888888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* Auth/Login Screen */
+        .auth-container { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+        .login-card { background: var(--pwice-card); padding: 40px; border-radius: 20px; border: 1px solid #262626; width: 100%; max-width: 350px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: white; box-sizing: border-box; }
+        .btn { width: 100%; padding: 12px; background: var(--pwice-blue); border: none; color: white; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+
+        /* Feed Screen */
+        .main-content { max-width: 500px; margin: 20px auto; padding-bottom: 80px; }
+        .post-card { background: var(--pwice-card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #262626; overflow: hidden; }
+        .post-header { padding: 12px; font-weight: bold; border-bottom: 1px solid #262626; }
+        .post-content { padding: 15px; }
+        
+        /* Bottom Nav */
+        .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pwice-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 15px 0; font-size: 1.5rem; }
     </style>
 </head>
 <body>
 
-<div class="auth-container">
-    <div class="logo">Pwice</div>
+<div id="auth-screen" class="auth-container">
+    <div class="logo-text" style="font-size: 3rem; margin-bottom: 20px;">Pwice</div>
     <div class="login-card">
         <h2 style="margin-top: 0;">Secure Entrance</h2>
-        <input type="text" placeholder="Global Username / Email">
-        <input type="password" placeholder="Encrypted Password">
-        <button class="btn" onclick="alert('Starting Pwice Secure Session...')">Join the World</button>
-        <p class="privacy-note">Your data is yours. Period.</p>
+        <input type="text" id="user-input" placeholder="Global Username">
+        <input type="password" id="pass-input" placeholder="Encrypted Password">
+        <button class="btn" onclick="enterPwice()">Join the World</button>
+        <p style="font-size: 0.8rem; color: #8e8e8e; margin-top: 20px;">Your data is yours. Period.</p>
     </div>
 </div>
+
+<div id="app-screen" class="hidden">
+    <nav>
+        <div class="logo-text">Pwice</div>
+        <div style="font-size: 1.2rem;">🔔</div>
+    </nav>
+
+    <div class="main-content">
+        <div class="post-card">
+            <div class="post-header">@Pwice_Global</div>
+            <div class="post-content">Welcome to the future. Your privacy is now global. 🌎🔒</div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <span>🏠</span><span>🔍</span><span>➕</span><span onclick="location.reload()">👤</span>
+    </div>
+</div>
+
+<script>
+    // Firebase Config (Yahan apni kal wali keys ek baar paste kar dena bhai)
+    const firebaseConfig = {
+        apiKey: "REPLACE_WITH_YOUR_KEY",
+        authDomain: "pwice-app.firebaseapp.com",
+        projectId: "pwice-app",
+        storageBucket: "pwice-app.appspot.com",
+        messagingSenderId: "ID",
+        appId: "APP_ID"
+    };
+
+    // App Logic
+    function enterPwice() {
+        const user = document.getElementById('user-input').value;
+        if(user) {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+        }
+    }
+
+    // PWA & Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js');
+    }
+</script>
 
 </body>
 </html>
