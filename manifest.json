@@ -1,10 +1,10 @@
 {
-  "name": "Priva",
-  "short_name": "Priva",
-  "start_url": "/",
+  "name": "Pwice - Global Private Connect",
+  "short_name": "Pwice",
+  "start_url": "/index.html",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#2563eb",
+  "background_color": "#000000",
+  "theme_color": "#0095f6",
   "icons": [
     {
       "src": "logo.png",
