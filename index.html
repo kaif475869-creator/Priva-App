@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pwice - Private Global Connect</title>
+    
+    <title>Pwice - Global Private Connect</title>
+    <meta name="description" content="Pwice: India's private social network. Watch reels and connect globally without data leaks.">
+    
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="logo.png" type="image/png">
-    
+    <meta name="theme-color" content="#000000">
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -18,7 +22,7 @@
         nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .logo-text { font-size: 1.5rem; font-weight: bold; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* Reels Container */
+        /* Reels Player */
         .reels-container { height: calc(100vh - 120px); overflow-y: scroll; scroll-snap-type: y mandatory; }
         .reel-video { height: 100%; width: 100%; scroll-snap-align: start; position: relative; background: #1a1a1a; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #333; }
         .reel-overlay { position: absolute; bottom: 20px; left: 15px; text-shadow: 1px 1px 5px rgba(0,0,0,0.8); }
@@ -40,49 +44,39 @@
 <div id="auth-page" class="auth-box">
     <div class="logo-text" style="font-size: 3rem; margin-bottom: 20px;">Pwice</div>
     <div class="login-card">
-        <input type="text" id="u-name" placeholder="Username">
+        <input type="text" id="u-name" placeholder="Global Username">
         <input type="password" id="u-pass" placeholder="Password">
-        <button class="btn-main" onclick="startApp()">Enter Pwice</button>
-        <p style="font-size: 0.8rem; color: #888; margin-top: 15px;">Secure Supabase Privacy 🛡️</p>
+        <button class="btn-main" onclick="enterPwice()">Join Pwice</button>
+        <p style="font-size: 0.8rem; color: #888; margin-top: 15px;">Encrypted Privacy 🔒</p>
     </div>
 </div>
 
 <div id="main-app" class="hidden">
-    <nav>
-        <div class="logo-text">Pwice</div>
-        <div>🔔 ✉️</div>
-    </nav>
-
+    <nav><div class="logo-text">Pwice</div><div>🔔 ✉️</div></nav>
     <div class="reels-container" id="reels-list">
         <div class="reel-video">
-            <div style="color: #555;">[Reels Loading...]</div>
+            <div style="color: #555;">[Pwice Reels Loading...]</div>
             <div class="reel-overlay">
-                <div style="font-weight: bold;">@Pwice_Global</div>
-                <div>Global connection, private experience. 🌍🔒</div>
+                <div style="font-weight: bold;">@Pwice_Official</div>
+                <div>India's own private network. 🇮🇳</div>
             </div>
             <div class="reel-actions"><span>❤️</span><span>💬</span><span>🚀</span></div>
         </div>
     </div>
-
-    <div class="bottom-bar">
-        <span class="active">🏠</span><span>🔍</span>
-        <span style="font-size: 1.8rem;">🎬</span><span>➕</span>
-        <span onclick="location.reload()">👤</span>
-    </div>
+    <div class="bottom-bar"><span class="active">🏠</span><span>🔍</span><span style="font-size: 1.8rem;">🎬</span><span>➕</span><span onclick="location.reload()">👤</span></div>
 </div>
 
 <script>
-    // Aapke Supabase URL aur Key
+    // Supabase Connect
     const supabaseUrl = 'https://xgxmbfbuplkzwnrueusy.supabase.co'; 
-    const supabaseKey = 'sb_publishable_W-5nmUs4gRcD0BDsv7BM9w_R6rpx87j'; // Dashboard se yahan paste karein
+    const supabaseKey = 'sb_publishable_W-5nmUs4gRcD0BDsv7BM9w_R6rpx87j'; // Aapki Key
+    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    function startApp() {
+    function enterPwice() {
         const user = document.getElementById('u-name').value;
         if(user) {
             document.getElementById('auth-page').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
-        } else {
-            alert("Username enter karein bhai!");
         }
     }
 
