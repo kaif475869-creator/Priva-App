@@ -7,9 +7,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="logo.png" type="image/png">
     
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         :root { --pw-blue: #0095f6; --pw-dark: #000000; --pw-card: #121212; --pw-text: #ffffff; }
@@ -20,7 +18,7 @@
         nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .logo-text { font-size: 1.5rem; font-weight: bold; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* Reels Container (TikTok Style) */
+        /* Reels Container */
         .reels-container { height: calc(100vh - 120px); overflow-y: scroll; scroll-snap-type: y mandatory; }
         .reel-video { height: 100%; width: 100%; scroll-snap-align: start; position: relative; background: #1a1a1a; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #333; }
         .reel-overlay { position: absolute; bottom: 20px; left: 15px; text-shadow: 1px 1px 5px rgba(0,0,0,0.8); }
@@ -45,7 +43,7 @@
         <input type="text" id="u-name" placeholder="Username">
         <input type="password" id="u-pass" placeholder="Password">
         <button class="btn-main" onclick="startApp()">Enter Pwice</button>
-        <p style="font-size: 0.8rem; color: #888; margin-top: 15px;">Global Privacy Protected 🔒</p>
+        <p style="font-size: 0.8rem; color: #888; margin-top: 15px;">Secure Supabase Privacy 🛡️</p>
     </div>
 </div>
 
@@ -57,40 +55,27 @@
 
     <div class="reels-container" id="reels-list">
         <div class="reel-video">
-            <div style="color: #555;">[Video Content Loading...]</div>
+            <div style="color: #555;">[Reels Loading...]</div>
             <div class="reel-overlay">
-                <div style="font-weight: bold;">@Pwice_Official</div>
-                <div>Welcome to the first Reel! 🎬</div>
+                <div style="font-weight: bold;">@Pwice_Global</div>
+                <div>Global connection, private experience. 🌍🔒</div>
             </div>
-            <div class="reel-actions">
-                <span>❤️</span><span>💬</span><span>🚀</span>
-            </div>
-        </div>
-        <div class="reel-video">
-            <div style="color: #555;">[Entertainment Awaits...]</div>
-            <div class="reel-overlay">
-                <div style="font-weight: bold;">@Ishaan_Pwice</div>
-                <div>Global connect, no data leaks. 🛡️</div>
-            </div>
-            <div class="reel-actions">
-                <span>❤️</span><span>💬</span><span>🚀</span>
-            </div>
+            <div class="reel-actions"><span>❤️</span><span>💬</span><span>🚀</span></div>
         </div>
     </div>
 
     <div class="bottom-bar">
-        <span class="active">🏠</span>
-        <span>🔍</span>
-        <span style="font-size: 1.8rem;">🎬</span>
-        <span>➕</span>
+        <span class="active">🏠</span><span>🔍</span>
+        <span style="font-size: 1.8rem;">🎬</span><span>➕</span>
         <span onclick="location.reload()">👤</span>
     </div>
 </div>
 
 <script>
-    // Firebase Placeholder (Bhai apni keys yahan zaroor daal dena)
-    const firebaseConfig = { apiKey: "REPLACE_ME" };
-    
+    // Aapke Supabase URL aur Key
+    const supabaseUrl = 'https://xgxmbfbuplkzwnrueusy.supabase.co'; 
+    const supabaseKey = 'sb_publishable_W-5nmUs4gRcD0BDsv7BM9w_R6rpx87j'; // Dashboard se yahan paste karein
+
     function startApp() {
         const user = document.getElementById('u-name').value;
         if(user) {
