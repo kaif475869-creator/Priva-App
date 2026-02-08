@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Priva - Connect Better</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="logo.png" type="image/png">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
     <style>
         body {
             margin: 0;
@@ -83,6 +89,15 @@
 </div>
 
 <script>
+    // App Registration Script
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Priva App ready!'))
+            .catch(err => console.log('Error setting up app'));
+        });
+    }
+
     function showSignUp() {
         document.getElementById('title').innerText = 'Create ID';
         document.getElementById('form-content').innerHTML = `
