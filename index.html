@@ -19,8 +19,6 @@
         .toggle-text { margin-top: 20px; font-size: 0.9rem; color: #8e8e8e; }
         .toggle-text span { color: var(--pw-blue); cursor: pointer; font-weight: bold; }
         .logo-text { font-size: 3rem; font-weight: bold; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; }
-        
-        /* Main App Styles */
         nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .reels-container { height: calc(100vh - 120px); overflow-y: scroll; scroll-snap-type: y mandatory; }
         .reel-video { height: 100%; width: 100%; scroll-snap-align: start; position: relative; background: #1a1a1a; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #333; }
@@ -37,16 +35,16 @@
     <div id="auth-form" class="login-card">
         <h2 id="form-title">Login</h2>
         <input type="text" id="u-fullname" class="hidden" placeholder="Full Name">
-        <input type="text" id="u-contact" placeholder="Mobile Number or Email">
-        <input type="password" id="u-pass" placeholder="Create Password">
+        <input type="text" id="u-contact" placeholder="Email or Mobile Number">
+        <input type="password" id="u-pass" placeholder="Password">
         <button class="btn-main" id="auth-btn" onclick="handleAuth()">Login</button>
         <p class="toggle-text" id="toggle-msg">Don't have an account? <span onclick="toggleForm()">Create Account</span></p>
     </div>
 
     <div id="otp-screen" class="login-card hidden">
         <h2>Enter OTP</h2>
-        <p style="font-size: 0.8rem; color: #8e8e8e;">Humein aapke contact par 6-digit code bheja hai.</p>
-        <input type="number" id="otp-input" placeholder="000000" style="text-align: center; letter-spacing: 5px; font-size: 1.5rem;">
+        <p style="font-size: 0.8rem; color: #8e8e8e;">Humein code bhej diya hai, check karein.</p>
+        <input type="number" id="otp-input" placeholder="000000" style="text-align: center; font-size: 1.5rem;">
         <button class="btn-main" onclick="verifyOTP()">Verify & Finish</button>
         <p class="toggle-text"><span onclick="location.reload()">Back to Login</span></p>
     </div>
@@ -55,9 +53,7 @@
 <div id="main-app" class="hidden">
     <nav><div class="logo-text" style="font-size: 1.5rem; margin: 0;">Pwice</div><div>🔔 ✉️</div></nav>
     <div class="reels-container" id="reels-list">
-        <div class="reel-video">
-            <div style="color: #555;">[Reels Loading...]</div>
-        </div>
+        <div class="reel-video"><div style="color: #555;">[Reels Loading...]</div></div>
     </div>
     <div class="bottom-bar">
         <span onclick="fetchPosts()">🏠</span>
@@ -74,7 +70,6 @@
     const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
     let isLogin = true;
-    let tempUserData = null; // OTP verify hone tak data yahan rahega
 
     function toggleForm() {
         isLogin = !isLogin;
@@ -87,40 +82,45 @@
     }
 
     async function handleAuth() {
-        const fullName = document.getElementById('u-fullname').value;
         const contact = document.getElementById('u-contact').value;
         const pass = document.getElementById('u-pass').value;
 
-        if(!contact || !pass) { alert("Bhai, sari details bhariye!"); return; }
+        if(!contact || !pass) { alert("Sari details dalo bhai!"); return; }
 
         if (!isLogin) {
-            // STEP: Signup - Pehle OTP screen dikhao
-            tempUserData = { full_name: fullName, contact: contact, password: pass };
-            document.getElementById('auth-form').classList.add('hidden');
-            document.getElementById('otp-screen').classList.remove('hidden');
-            console.log("OTP Sent to:", contact); // Fake simulation for now
+            // ASLI SIGNUP: Code bhejega
+            const { data, error } = await _supabase.auth.signUp({
+                email: contact, // Email dalenge to seedha jayega
+                password: pass,
+            });
+
+            if (error) { alert("Signup Fail: " + error.message); } 
+            else {
+                document.getElementById('auth-form').classList.add('hidden');
+                document.getElementById('otp-screen').classList.remove('hidden');
+            }
         } else {
-            // STEP: Login
-            const { data, error } = await _supabase.from('Users').select('*').eq('contact', contact).eq('password', pass).single();
-            if (data) { loginSuccess(); } else { alert("Galat details! Sahi password dalo."); }
+            // LOGIN
+            const { data, error } = await _supabase.auth.signInWithPassword({
+                email: contact,
+                password: pass,
+            });
+            if (data.user) { loginSuccess(); } else { alert("Wrong details!"); }
         }
     }
 
     async function verifyOTP() {
         const otp = document.getElementById('otp-input').value;
-        
-        // Abhi ke liye humne '123456' ko default OTP rakha hai testing ke liye
-        if(otp === "123456") {
-            const { data, error } = await _supabase.from('Users').insert([tempUserData]);
-            if (error) { 
-                alert("Database Error: " + error.message); 
-            } else {
-                alert("OTP Verified! Pwice ID Ban gayi. 🎉");
-                loginSuccess();
-            }
-        } else {
-            alert("Galat OTP! Sahi code dalo bhai.");
-        }
+        const contact = document.getElementById('u-contact').value;
+
+        const { data, error } = await _supabase.auth.verifyOtp({
+            email: contact,
+            token: otp,
+            type: 'signup',
+        });
+
+        if (error) { alert("Galat OTP!"); } 
+        else { alert("Verified! 🎉"); loginSuccess(); }
     }
 
     function loginSuccess() {
@@ -133,7 +133,6 @@
         const { data, error } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
         const reelsList = document.getElementById('reels-list');
         reelsList.innerHTML = ''; 
-
         if (data && data.length > 0) {
             data.forEach(post => {
                 reelsList.innerHTML += `
@@ -148,11 +147,12 @@
     }
 
     async function uploadPost() {
-        const imageUrl = prompt("Image URL dalo:");
-        const caption = prompt("Caption likho:");
-        if (!imageUrl) return;
-        const { error } = await _supabase.from('posts').insert([{ image_url: imageUrl, caption: caption }]);
-        if (!error) { fetchPosts(); }
+        const imageUrl = prompt("Image URL:");
+        const caption = prompt("Caption:");
+        if (imageUrl) {
+            await _supabase.from('posts').insert([{ image_url: imageUrl, caption: caption }]);
+            fetchPosts();
+        }
     }
 </script>
 </body>
