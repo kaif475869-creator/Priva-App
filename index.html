@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pwice - Global Private Connect</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="logo.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -13,33 +11,33 @@
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--pw-dark); color: var(--pw-text); overflow-x: hidden; }
         .hidden { display: none !important; }
         
-        /* EXACT PREMIUM LOGO STYLE FROM IMAGE */
+        /* YE HAI EXACT LOGO STYLE JO AAPNE MANGA THA */
         .logo-text { 
-            font-size: 3.8rem; 
+            font-size: 4rem; /* Thoda bada kiya hai */
             font-weight: 900; 
             font-style: italic;
-            /* Wahi stylish gradient jo aapne manga tha */
-            background: linear-gradient(to right, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            display: inline-block;
+            /* Instagram jaisa premium gradient exact match */
+            background: -webkit-linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
             -webkit-background-clip: text; 
             -webkit-text-fill-color: transparent; 
-            margin-bottom: 25px;
-            letter-spacing: -3px;
-            display: inline-block;
+            margin-bottom: 30px;
+            letter-spacing: -2.5px;
             font-family: 'Arial Black', sans-serif;
         }
 
         .auth-box { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
         .login-card { background: var(--pw-card); padding: 35px; border-radius: 20px; width: 100%; max-width: 360px; border: 1px solid #262626; text-align: center; }
-        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: #1a1a1a; color: white; box-sizing: border-box; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: #1a1a1a; color: white; box-sizing: border-box; font-size: 1rem; }
         .btn-main { width: 100%; padding: 14px; background: var(--pw-blue); border: none; color: white; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; }
         .toggle-text { margin-top: 25px; font-size: 0.95rem; color: #8e8e8e; }
         .toggle-text span { color: var(--pw-blue); cursor: pointer; font-weight: bold; }
         
         nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pw-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 15px 0; font-size: 1.6rem; z-index: 100; }
         .reels-container { height: calc(100vh - 120px); overflow-y: scroll; scroll-snap-type: y mandatory; }
         .reel-video { height: 100%; width: 100%; scroll-snap-align: start; position: relative; background: #000; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #262626; }
-        .reel-overlay { position: absolute; bottom: 30px; left: 20px; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); z-index: 10; }
-        .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pw-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 12px 0; font-size: 1.6rem; z-index: 100; }
     </style>
 </head>
 <body>
@@ -67,11 +65,11 @@
 
 <div id="main-app" class="hidden">
     <nav>
-        <div class="logo-text" style="font-size: 2rem; margin: 0; letter-spacing: -1.5px;">Pwice</div>
-        <div>🔔 ✉️</div>
+        <div class="logo-text" style="font-size: 2.2rem; margin: 0; letter-spacing: -2px;">Pwice</div>
+        <div style="font-size: 1.5rem;">🔔 ✉️</div>
     </nav>
     <div class="reels-container" id="reels-list">
-        <div class="reel-video"><div style="color: #444;">[Reels Loading...]</div></div>
+        <div class="reel-video"><div style="color: #444;">Loading...</div></div>
     </div>
     <div class="bottom-bar">
         <span onclick="fetchPosts()">🏠</span>
@@ -83,6 +81,7 @@
 </div>
 
 <script>
+    // Supabase config...
     const supabaseUrl = 'https://xgxmbfbuplkzwnrueusy.supabase.co'; 
     const supabaseKey = 'sb_publishable_W-5nmUs4gRcD0BDsv7BM9w_R6rpx87j'; 
     const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
@@ -103,24 +102,23 @@
         const email = document.getElementById('u-email').value;
         const pass = document.getElementById('u-pass').value;
         const fullName = document.getElementById('u-fullname').value;
-        if(!email || !pass) { alert("Sari details dalo bhai!"); return; }
+        if(!email || !pass) { alert("Details bhariye!"); return; }
 
         if (!isLogin) {
-            const { error } = await _supabase.auth.signUp({ email: email, password: pass, options: { data: { full_name: fullName } } });
+            const { error } = await _supabase.auth.signUp({ email, password: pass, options: { data: { full_name: fullName } } });
             if (error) { alert("Signup Fail: " + error.message); } 
             else { document.getElementById('auth-form').classList.add('hidden'); document.getElementById('otp-screen').classList.remove('hidden'); }
         } else {
-            const { data, error } = await _supabase.auth.signInWithPassword({ email: email, password: pass });
-            if (data.user) { loginSuccess(); } else { alert("Login fail!"); }
+            const { data, error } = await _supabase.auth.signInWithPassword({ email, password: pass });
+            if (data.user) { loginSuccess(); } else { alert("Login failed!"); }
         }
     }
 
     async function verifyOTP() {
         const otp = document.getElementById('otp-input').value;
         const email = document.getElementById('u-email').value;
-        const { error } = await _supabase.auth.verifyOtp({ email: email, token: otp, type: 'signup' });
-        if (error) { alert("Galat OTP!"); } 
-        else { alert("Verified! Welcome to Pwice 🎉"); loginSuccess(); }
+        const { error } = await _supabase.auth.verifyOtp({ email, token: otp, type: 'signup' });
+        if (error) { alert("Galat OTP!"); } else { loginSuccess(); }
     }
 
     function loginSuccess() {
@@ -137,15 +135,13 @@
             data.forEach(post => {
                 reelsList.innerHTML += `<div class="reel-video"><img src="${post.image_url}" style="width:100%; height:100%; object-fit:cover;"><div class="reel-overlay"><b>@user</b><br>${post.caption || ''}</div></div>`;
             });
-        } else {
-            reelsList.innerHTML = '<div class="reel-video">No posts yet. ➕</div>';
-        }
+        } else { reelsList.innerHTML = '<div class="reel-video">No posts yet. ➕</div>'; }
     }
 
     async function uploadPost() {
-        const imageUrl = prompt("Photo link:");
+        const imageUrl = prompt("Photo Link:");
         const caption = prompt("Caption:");
-        if (imageUrl) { await _supabase.from('posts').insert([{ image_url: imageUrl, caption: caption }]); fetchPosts(); }
+        if (imageUrl) { await _supabase.from('posts').insert([{ image_url: imageUrl, caption }]); fetchPosts(); }
     }
 </script>
 </body>
