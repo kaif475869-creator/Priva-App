@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pwice</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+ :root{--pw-blue:#0095f6; --pw-dark:#000; --pw-grad:linear-gradient(to right,#80d0ff,#b399ff,#d9b3ff);}
+ body{margin:0; font-family:-apple-system, sans-serif; background:#000; color:#fff; height:100vh; overflow:hidden;}
+ .hidden{display:none!important}
+ .logo-text{font-size:2rem; font-weight:900; font-style:italic; background:var(--pw-grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent;}
+ #loader{position:fixed; inset:0; display:flex; justify-content:center; align-items:center; background:#000; z-index:9999;}
+ nav{display:flex; justify-content:center; align-items:center; padding:15px; border-bottom:1px solid #262626;}
+ .view-container{height:calc(100vh - 130px); overflow-y:auto; -webkit-overflow-scrolling:touch;}
+ .msg-box{flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;}
+ .msg{max-width:75%; padding:10px 14px; border-radius:18px; font-size:1rem;}
+ .sent{align-self:flex-end; background:var(--pw-blue); border-bottom-right-radius:4px;}
+ .received{align-self:flex-start; background:#262626; border-bottom-left-radius:4px;}
+ .chat-input-area{position:fixed; bottom:0; width:100%; display:flex; gap:10px; padding:10px; border-top:1px solid #262626; background:#000; z-index:1000;}
+ .chat-input{flex:1; padding:12px; border-radius:25px; border:1px solid #333; background:#1a1a1a; color:white; outline:none;}
+ .bottom-bar{position:fixed; bottom:0; width:100%; display:flex; justify-content:space-around; padding:15px 0; border-top:1px solid #262626; background:#000; font-size:1.8rem; z-index:900;}
+</style>
+</head>
+<body>
+<div id="loader"><div class="logo-text">Pwice</div></div>
+<div id="main-app" class="hidden">
+ <nav id="top-nav"><div class="logo-text">Pwice</div></nav>
+ <div id="feed-view" class="view-container"></div>
+ <div id="chat-view" class="view-container hidden">
+  <div style="padding:15px; border-bottom:1px solid #262626; font-weight:bold;">Chats</div>
+  <div id="msg-list" class="msg-box"></div>
+  <div id="typing-ui" style="font-size:0.8rem; color:var(--pw-blue); padding:5px 15px;" class="hidden">typing...</div>
+  <div class="chat-input-area">
+   <input id="chat-input" class="chat-input" placeholder="Message..." oninput="handleTyping()">
+   <button onclick="sendMsg()" style="color:var(--pw-blue); background:none; border:none; font-weight:bold;">Send</button>
+  </div>
+ </div>
+ <div id="profile-view" class="view-container hidden" style="text-align:center; padding-top:50px">
+  <h3 id="p-name"></h3>
+  <button onclick="logout()" style="background:#e74c3c; color:white; border:none; padding:10px 20px; border-radius:10px;">Logout</button>
+ </div>
+ <div id="bottom-nav" class="bottom-bar">
+  <div onclick="switchTab('feed')">🏠</div>
+  <div onclick="switchTab('chat')">✉️</div>
+  <div onclick="switchTab('profile')">👤</div>
+ </div>
+</div>
+<script>
+ const _pw=supabase.createClient('https://xgxmbfbuplkzwnrueusy.supabase.co', 'sb_publishable_W-5nmUs4gRcD0BDsv7BM9w_R6rpx87j');
+ let myId=null; let tTimer;
+ async function init(){
+  const {data:{session}}=await _pw.auth.getSession();
+  if(session){
+   myId=session.user.id;
+   document.getElementById('main-app').classList.remove('hidden');
+   document.getElementById('p-name').innerText=session.user.email;
+   loadFeed();
+   _pw.channel('messages').on('postgres_changes',{event:'INSERT',table:'messages'},p=>{
+    const isMe=p.new.sender_id===myId;
+    const list=document.getElementById('msg-list');
+    list.innerHTML+=`<div class="msg ${isMe?'sent':'received'}">${p.new.text}</div>`;
+    list.scrollTop=list.scrollHeight;
+   }).subscribe();
+  }
+  document.getElementById('loader').classList.add('hidden');
+ }
+ function switchTab(t){
+  ['feed-view','profile-view','chat-view'].forEach(v=>document.getElementById(v).classList.add('hidden'));
+  document.getElementById(t+'-view').classList.remove('hidden');
+  document.getElementById('bottom-nav').classList.toggle('hidden', t==='chat');
+ }
+ async function sendMsg(){
+  const input=document.getElementById('chat-input');
+  if(!input.value.trim())return;
+  await _pw.from('messages').insert([{sender_id:myId, receiver_id:myId, text:input.value}]);
+  input.value='';
+ }
+ function handleTyping(){
+  document.getElementById('typing-ui').classList.remove('hidden');
+  clearTimeout(tTimer);
+  tTimer=setTimeout(()=>document.getElementById('typing-ui').classList.add('hidden'),1500);
+ }
+ async function loadFeed(){
+  const {data}=await _pw.from('posts').select('*').order('created_at',{ascending:false});
+  const feed=document.getElementById('feed-view'); feed.innerHTML='';
+  data?.forEach(p=>feed.innerHTML+=`<div style="padding:15px"><img src="${p.image_url}" style="width:100%; border-radius:15px;"></div>`);
+ }
+ async function logout(){await _pw.auth.signOut(); window.location.reload();}
+ window.onload=init;
+</script>
+</body>
+</html>
