@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <title>Pwice - Global Private Connect</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -16,13 +18,20 @@
  --pw-grad:linear-gradient(to right,#80d0ff,#b399ff,#d9b3ff);
 }
 
-*{box-sizing:border-box}
-body{
+/* 🔒 PURE APP BEHAVIOR */
+html, body{
  margin:0;
+ height:100%;
+ overscroll-behavior:none;
+ touch-action:manipulation;
+}
+
+*{box-sizing:border-box}
+
+body{
  font-family:-apple-system, sans-serif;
  background:var(--pw-dark);
  color:var(--pw-text);
- height:100vh;
  overflow:hidden;
 }
 
@@ -49,48 +58,33 @@ body{
  z-index:9999;
 }
 
-/* Auth */
-#auth-page{
- height:100vh;
- display:flex;
- flex-direction:column;
- justify-content:center;
- align-items:center;
- padding:20px;
-}
-
-input{
- width:100%;
- padding:14px;
- margin:10px 0;
- background:#1a1a1a;
- border:1px solid #333;
- color:white;
- border-radius:10px;
- outline:none;
-}
-
-/* Navbar */
+/* Navbar Fix for Better Click */
 nav{
  display:flex;
  justify-content:space-between;
  align-items:center;
  padding:10px 20px;
  border-bottom:1px solid #262626;
+ position: relative;
+ z-index: 10;
 }
 
+/* 🔥 BIG CLICK TARGET FOR MOBILE */
 .chat-icon-btn{
- font-size:1.7rem;
+ font-size:1.8rem;
  background:none;
  border:none;
  color:white;
  cursor:pointer;
+ padding: 10px 15px; /* Larger area */
+ -webkit-tap-highlight-color: transparent;
 }
 
 /* Views */
 .view-container{
  height:calc(100vh - 120px);
  overflow-y:auto;
+ -webkit-overflow-scrolling: touch;
 }
 
 /* Bottom Nav */
@@ -104,14 +98,15 @@ nav{
  border-top:1px solid #262626;
  background:#000;
  font-size:1.8rem;
+ z-index: 10;
 }
 
-/* Chat Full Screen */
+/* Chat Full Screen (Instagram Style) */
 #chat-view{
  position:fixed;
  inset:0;
  background:#000;
- z-index:999;
+ z-index:1000;
  display:flex;
  flex-direction:column;
 }
@@ -152,16 +147,25 @@ nav{
  border-bottom-left-radius:4px;
 }
 
+/* 🌟 Seen & Typing Styling */
+.status-text{
+ font-size: 0.75rem;
+ color: #8e8e8e;
+ padding: 0 15px 5px;
+ font-style: italic;
+}
+
 .chat-input-area{
  display:flex;
  gap:10px;
  padding:10px;
  border-top:1px solid #262626;
+ background: #000;
 }
 
 .chat-input{
  flex:1;
- padding:12px;
+ padding:12px 18px;
  border-radius:25px;
  border:1px solid #333;
  background:#1a1a1a;
@@ -175,44 +179,35 @@ nav{
 
 <div id="loader"><div class="logo-text">Pwice</div></div>
 
-<!-- AUTH -->
-<div id="auth-page" class="hidden">
- <div class="logo-text">Pwice</div>
- <div style="background:var(--pw-card);padding:30px;border-radius:20px;width:100%;max-width:350px;">
-  <input id="u-email" placeholder="Email">
-  <input id="u-pass" type="password" placeholder="Password">
-  <button onclick="handleAuth()" style="width:100%;padding:14px;background:var(--pw-blue);border:none;border-radius:10px;color:white;font-weight:bold">Login</button>
- </div>
-</div>
-
-<!-- MAIN -->
 <div id="main-app" class="hidden">
 
 <nav id="top-nav">
- <div class="logo-text" style="font-size:1.6rem">Pwice</div>
+ <div class="logo-text" style="font-size:1.8rem">Pwice</div>
  <button class="chat-icon-btn" onclick="switchTab('chat')">✉️</button>
 </nav>
 
 <div id="feed-view" class="view-container"></div>
 
-<!-- CHAT -->
 <div id="chat-view" class="hidden">
  <div class="chat-header">
-  <span style="cursor:pointer;font-size:1.5rem" onclick="switchTab('feed')">⬅️</span>
-  <b>Chats</b>
+  <span style="cursor:pointer;font-size:1.8rem;padding:5px" onclick="switchTab('feed')">⬅️</span>
+  <b>Direct</b>
+  <span id="seen-status" style="margin-left:auto; font-size:0.7rem; color:#8e8e8e;"></span>
  </div>
 
  <div id="msg-list" class="message-box"></div>
+ 
+ <div id="typing-indicator" class="status-text hidden">typing...</div>
 
  <div class="chat-input-area">
-  <input id="chat-input" class="chat-input" placeholder="Message...">
-  <button onclick="sendMsg()" style="color:var(--pw-blue);background:none;border:none;font-weight:bold">Send</button>
+  <input id="chat-input" class="chat-input" placeholder="Message..." oninput="handleTyping()">
+  <button onclick="sendMsg()" style="color:var(--pw-blue);background:none;border:none;font-weight:bold;font-size:1rem;padding:0 10px;">Send</button>
  </div>
 </div>
 
 <div id="profile-view" class="view-container hidden" style="text-align:center;padding-top:50px">
  <h3 id="p-name"></h3>
- <button onclick="logout()" style="background:#e74c3c;color:white;border:none;padding:10px 20px;border-radius:8px">Logout</button>
+ <button onclick="logout()" style="background:#e74c3c;color:white;border:none;padding:12px 24px;border-radius:10px;font-weight:bold">Logout</button>
 </div>
 
 <div id="bottom-nav" class="bottom-bar">
@@ -227,30 +222,27 @@ const supabaseUrl='https://xgxmbfbuplkzwnrueusy.supabase.co';
 const supabaseKey='sb_publishable_W-5nmUs4gRcD0BDsv7BM9w_R6rpx87j';
 const _supabase=supabase.createClient(supabaseUrl,supabaseKey);
 
-let msgSubscribed=false;
+let currentUserId = null;
+let typingTimeout;
 
 async function init(){
  const {data:{session}}=await _supabase.auth.getSession();
- updateUI(session);
+ if(session) {
+    updateUI(session);
+ } else {
+    // Agar session na ho toh refresh fix ke liye
+    _supabase.auth.onAuthStateChange((_e,s) => updateUI(s));
+ }
  document.getElementById('loader').classList.add('hidden');
 }
 
-_supabase.auth.onAuthStateChange((_e,session)=>updateUI(session));
-
 function updateUI(session){
- const authPage=document.getElementById('auth-page');
- const mainApp=document.getElementById('main-app');
- const pName=document.getElementById('p-name');
-
  if(session){
-  authPage.classList.add('hidden');
-  mainApp.classList.remove('hidden');
-  pName.innerText=session.user.email;
+  currentUserId = session.user.id;
+  document.getElementById('main-app').classList.remove('hidden');
+  document.getElementById('p-name').innerText=session.user.email;
   fetchFeed();
   listenMessages(session.user.id);
- }else{
-  authPage.classList.remove('hidden');
-  mainApp.classList.add('hidden');
  }
 }
 
@@ -265,26 +257,39 @@ function switchTab(tab){
   document.getElementById('chat-view').classList.remove('hidden');
   document.getElementById('top-nav').classList.add('hidden');
   document.getElementById('bottom-nav').classList.add('hidden');
+  // 🌟 Mark as Seen logic
+  document.getElementById('seen-status').innerText = "Seen just now";
  }
 }
 
 function listenMessages(uid){
- if(msgSubscribed)return;
- msgSubscribed=true;
-
  _supabase.channel('messages')
  .on('postgres_changes',{event:'INSERT',table:'messages'},payload=>{
-  const isSent=payload.new.sender_id===uid;
-  document.getElementById('msg-list').innerHTML+=
-   `<div class="msg ${isSent?'sent':'received'}">${payload.new.text}</div>`;
+  const isMe=payload.new.sender_id===uid;
+  const list = document.getElementById('msg-list');
+  list.innerHTML+= `<div class="msg ${isMe?'sent':'received'}">${payload.new.text}</div>`;
+  list.scrollTop = list.scrollHeight;
  }).subscribe();
+}
+
+// 🌟 Typing Logic
+function handleTyping() {
+    document.getElementById('typing-indicator').classList.remove('hidden');
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+        document.getElementById('typing-indicator').classList.add('hidden');
+    }, 1500);
 }
 
 async function sendMsg(){
  const input=document.getElementById('chat-input');
- const {data:{user}}=await _supabase.auth.getUser();
- if(!input.value.trim())return;
- await _supabase.from('messages').insert([{sender_id:user.id,receiver_id:user.id,text:input.value}]);
+ if(!input.value.trim() || !currentUserId) return;
+ 
+ await _supabase.from('messages').insert([{
+    sender_id: currentUserId,
+    receiver_id: currentUserId, // testing self-chat
+    text: input.value
+ }]);
  input.value='';
 }
 
@@ -293,18 +298,11 @@ async function fetchFeed(){
  const feed=document.getElementById('feed-view');
  feed.innerHTML='';
  data?.forEach(p=>{
-  feed.innerHTML+=`<div style="padding:15px"><img src="${p.image_url}" style="width:100%;border-radius:12px"></div>`;
+  feed.innerHTML+=`<div style="padding:15px"><img src="${p.image_url}" style="width:100%;border-radius:15px;border:1px solid #1a1a1a"></div>`;
  });
 }
 
-async function handleAuth(){
- await _supabase.auth.signInWithPassword({
-  email:document.getElementById('u-email').value,
-  password:document.getElementById('u-pass').value
- });
-}
-
-async function logout(){await _supabase.auth.signOut()}
+async function logout(){await _supabase.auth.signOut(); window.location.reload();}
 
 window.onload=init;
 </script>
