@@ -14,51 +14,41 @@
         body { margin: 0; font-family: -apple-system, sans-serif; background: var(--pw-dark); color: var(--pw-text); overflow: hidden; }
         .hidden { display: none !important; }
         
-        /* 🔥 Stylish Logo Fix */
+        /* Stylish Logo */
         .logo-text { 
             font-size: 3.5rem; font-weight: 900; font-style: italic; display: inline-block;
             background: var(--pw-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             letter-spacing: -2px; font-family: 'Arial Black', sans-serif; padding-right: 25px; line-height: 1.2;
         }
 
-        /* Nav & Bottom Bar */
+        /* Loading Screen (Fixed logout issue) */
+        #loader { height: 100vh; display: flex; justify-content: center; align-items: center; background: #000; position: fixed; width: 100%; z-index: 9999; }
+
+        /* App UI */
         nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pw-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 12px 0; font-size: 1.6rem; z-index: 100; }
         .view-container { height: calc(100vh - 120px); overflow-y: auto; }
 
-        /* Modern Chat Bubbles */
-        .message-box { padding: 15px; display: flex; flex-direction: column; gap: 10px; height: 80%; overflow-y: auto; }
-        .msg { max-width: 75%; padding: 10px 15px; border-radius: 18px; font-size: 0.95rem; }
-        .msg.sent { align-self: flex-end; background: var(--pw-blue); color: white; border-bottom-right-radius: 4px; }
-        .msg.received { align-self: flex-start; background: #262626; color: white; border-bottom-left-radius: 4px; }
-
-        /* Modal Overlay */
+        /* Modal & Form */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: flex-end; }
-        .modal-content { background: var(--pw-card); width: 100%; border-radius: 25px 25px 0 0; padding: 30px 20px; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        
+        .modal-content { background: var(--pw-card); width: 100%; border-radius: 25px 25px 0 0; padding: 30px 20px; }
         .modal-input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; background: #2c2c2e; border: 1px solid #333; color: white; box-sizing: border-box; }
+        .btn-main { width: 100%; padding: 14px; background: var(--pw-blue); border: none; color: white; border-radius: 10px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div id="pw-modal" class="modal-overlay hidden">
-    <div class="modal-content">
-        <h2 id="modal-title" style="margin-top:0;">Action</h2>
-        <input type="text" id="input-1" class="modal-input">
-        <input type="text" id="input-2" class="modal-input">
-        <button id="modal-submit-btn" style="width:100%; padding:15px; background:var(--pw-blue); border:none; color:white; border-radius:12px; font-weight:bold;">Confirm</button>
-        <button onclick="closeModal()" style="width:100%; background:none; border:none; color:#8e8e8e; margin-top:15px;">Cancel</button>
-    </div>
+<div id="loader">
+    <div class="logo-text" style="font-size: 2.5rem;">Pwice</div>
 </div>
 
-<div id="auth-page" class="auth-box" style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
+<div id="auth-page" class="hidden" style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
     <div class="logo-text">Pwice</div>
     <div class="login-card" style="background:var(--pw-card); padding:30px; border-radius:20px; width:100%; max-width:350px; text-align:center; border:1px solid #262626;">
         <h2 id="form-title">Login</h2>
-        <input type="email" id="u-email" placeholder="Email" style="width:100%; padding:14px; margin:10px 0; border-radius:10px; background:#1a1a1a; border:1px solid #333; color:white;">
-        <input type="password" id="u-pass" placeholder="Password" style="width:100%; padding:14px; margin:10px 0; border-radius:10px; background:#1a1a1a; border:1px solid #333; color:white;">
-        <button onclick="handleAuth()" style="width:100%; padding:14px; background:var(--pw-blue); border:none; color:white; border-radius:10px; font-weight:bold;">Submit</button>
+        <input type="email" id="u-email" placeholder="Email" class="modal-input">
+        <input type="password" id="u-pass" placeholder="Password" class="modal-input">
+        <button onclick="handleAuth()" class="btn-main">Login</button>
     </div>
 </div>
 
@@ -67,29 +57,18 @@
         <div class="logo-text" style="font-size: 1.8rem; margin: 0;">Pwice</div>
         <div style="font-size: 1.4rem;"><span onclick="switchTab('chat')">✉️</span></div>
     </nav>
-
     <div id="feed-view" class="view-container"></div>
-
     <div id="chat-view" class="view-container hidden">
         <div style="padding:15px; border-bottom:1px solid #262626;"><span onclick="switchTab('feed')">⬅️</span> <b>Direct</b></div>
-        <div class="message-box" id="msg-list"></div>
-        <div style="position:fixed; bottom:0; width:100%; background:#000; padding:10px; display:flex; gap:10px;">
-            <input type="text" id="chat-input" style="flex:1; background:#1a1a1a; border:1px solid #333; color:white; padding:10px; border-radius:20px;">
-            <button onclick="sendMsg()" style="color:var(--pw-blue); background:none; border:none; font-weight:bold;">Send</button>
-        </div>
+        <div id="msg-list" style="padding:15px;"></div>
     </div>
-
-    <div id="profile-view" class="view-container hidden" style="padding:20px; text-align:center;">
-        <img src="https://via.placeholder.com/150" style="width:100px; border-radius:50%;" id="p-img">
+    <div id="profile-view" class="view-container hidden" style="text-align:center; padding-top:40px;">
         <h3 id="p-name">User</h3>
         <button onclick="logout()" style="background:#e74c3c; border:none; color:white; padding:10px 20px; border-radius:8px;">Logout</button>
     </div>
-
-    <div class="bottom-bar" id="bottom-nav">
+    <div class="bottom-bar">
         <span onclick="switchTab('feed')">🏠</span>
-        <span>🔍</span>
-        <span onclick="openUpload()" style="font-size:2rem;">➕</span>
-        <span>🎬</span>
+        <span onclick="openUpload()">➕</span>
         <span onclick="switchTab('profile')">👤</span>
     </div>
 </div>
@@ -99,8 +78,18 @@
     const supabaseKey = 'sb_publishable_W-5nmUs4gRcD0BDsv7BM9w_R6rpx87j'; 
     const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // ✅ FIXED AUTO-LOGIN (Session handle)
-    _supabase.auth.onAuthStateChange((event, session) => {
+    // ✅ REFRESH LOGOUT FIX
+    async function checkUser() {
+        const { data: { session } } = await _supabase.auth.getSession();
+        handleUserChange(session);
+        document.getElementById('loader').classList.add('hidden'); // Check hone ke baad loader hatao
+    }
+
+    _supabase.auth.onAuthStateChange((_event, session) => {
+        handleUserChange(session);
+    });
+
+    function handleUserChange(session) {
         if (session) {
             document.getElementById('auth-page').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
@@ -110,26 +99,21 @@
             document.getElementById('auth-page').classList.remove('hidden');
             document.getElementById('main-app').classList.add('hidden');
         }
-    });
+    }
+
+    window.onload = checkUser; // Jaise hi page load ho, session check karo
 
     async function handleAuth() {
         const email = document.getElementById('u-email').value;
         const pass = document.getElementById('u-pass').value;
-        await _supabase.auth.signInWithPassword({ email, password: pass });
+        const { error } = await _supabase.auth.signInWithPassword({ email, password: pass });
+        if(error) alert(error.message);
     }
 
     function switchTab(tab) {
         document.getElementById('feed-view').classList.toggle('hidden', tab !== 'feed');
         document.getElementById('chat-view').classList.toggle('hidden', tab !== 'chat');
         document.getElementById('profile-view').classList.toggle('hidden', tab !== 'profile');
-        document.getElementById('bottom-nav').classList.toggle('hidden', tab === 'chat');
-    }
-
-    function sendMsg() {
-        const input = document.getElementById('chat-input');
-        if(!input.value) return;
-        document.getElementById('msg-list').innerHTML += `<div class="msg sent">${input.value}</div>`;
-        input.value = '';
     }
 
     async function fetchFeed() {
@@ -138,14 +122,6 @@
         data?.forEach(p => feed.innerHTML += `<div style="padding:15px;"><img src="${p.image_url}" style="width:100%; border-radius:12px;"></div>`);
     }
 
-    function openModal(title, p1, p2, callback) {
-        document.getElementById('modal-title').innerText = title;
-        document.getElementById('input-1').placeholder = p1; document.getElementById('input-2').placeholder = p2;
-        document.getElementById('pw-modal').classList.remove('hidden');
-        document.getElementById('modal-submit-btn').onclick = () => { callback(document.getElementById('input-1').value, document.getElementById('input-2').value); closeModal(); };
-    }
-    function closeModal() { document.getElementById('pw-modal').classList.add('hidden'); }
-    function openUpload() { openModal("New Post", "Image URL", "Caption", async (u, c) => { if(u) await _supabase.from('posts').insert([{image_url:u, caption:c}]); fetchFeed(); }); }
     async function logout() { await _supabase.auth.signOut(); }
 </script>
 </body>
