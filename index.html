@@ -4,69 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pwice - Global Private Connect</title>
-    <link rel="manifest" href="/manifest.json">
-    <link rel="icon" type="image/png" href="/favicon.png">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --pw-blue: #0095f6; --pw-dark: #000000; --pw-card: #1c1c1e; --pw-text: #ffffff; --pw-grad: linear-gradient(to right, #80d0ff, #b399ff, #d9b3ff); }
-        body { margin: 0; font-family: -apple-system, sans-serif; background: var(--pw-dark); color: var(--pw-text); overflow: hidden; }
+        body { margin: 0; font-family: -apple-system, sans-serif; background: var(--pw-dark); color: var(--pw-text); overflow: hidden; height: 100vh; }
         .hidden { display: none !important; }
-        .logo-text { font-size: 3.5rem; font-weight: 900; font-style: italic; display: inline-block; background: var(--pw-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px; padding-right: 25px; line-height: 1.2; }
-        #loader { height: 100vh; display: flex; justify-content: center; align-items: center; background: #000; position: fixed; width: 100%; z-index: 9999; }
-        nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pw-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 12px 0; font-size: 1.6rem; z-index: 100; }
-        .view-container { height: calc(100vh - 120px); overflow-y: auto; width: 100%; }
         
-        /* Chat Design */
-        .message-box { padding: 15px; display: flex; flex-direction: column; gap: 8px; height: 80%; }
-        .msg { max-width: 70%; padding: 10px 14px; border-radius: 18px; font-size: 0.95rem; }
+        /* Logo */
+        .logo-text { font-size: 3.5rem; font-weight: 900; font-style: italic; display: inline-block; background: var(--pw-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px; padding-right: 25px; line-height: 1.2; }
+        
+        #loader { height: 100vh; display: flex; justify-content: center; align-items: center; background: #000; position: fixed; width: 100%; z-index: 9999; }
+        
+        /* Nav Fix */
+        nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .chat-btn { font-size: 2rem; cursor: pointer; padding: 5px; display: block; }
+
+        .view-container { height: calc(100vh - 130px); overflow-y: auto; width: 100%; position: relative; }
+        
+        /* Chat UI */
+        .message-box { padding: 15px; display: flex; flex-direction: column; gap: 8px; height: 85%; }
+        .msg { max-width: 75%; padding: 10px 14px; border-radius: 18px; font-size: 1rem; color: white; }
         .msg.sent { align-self: flex-end; background: var(--pw-blue); border-bottom-right-radius: 4px; }
         .msg.received { align-self: flex-start; background: #262626; border-bottom-left-radius: 4px; }
-        .chat-input-area { position: fixed; bottom: 0; width: 100%; background: #000; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #262626; z-index: 200; }
+        
+        .chat-input-area { position: fixed; bottom: 0; width: 100%; background: #000; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #262626; }
         .chat-input { flex: 1; background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 25px; outline: none; }
+        
+        .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pw-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 15px 0; font-size: 1.8rem; }
     </style>
 </head>
 <body>
 
-<div id="loader"><div class="logo-text" style="font-size: 2.5rem;">Pwice</div></div>
+<div id="loader"><div class="logo-text" style="font-size: 2rem;">Pwice</div></div>
 
 <div id="auth-page" class="hidden" style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
     <div class="logo-text">Pwice</div>
-    <div style="background:var(--pw-card); padding:30px; border-radius:20px; width:100%; max-width:350px; text-align:center; border:1px solid #262626;">
-        <input type="email" id="u-email" placeholder="Email" style="width:100%; padding:14px; margin:10px 0; border-radius:10px; background:#1a1a1a; border:1px solid #333; color:white;">
-        <input type="password" id="u-pass" placeholder="Password" style="width:100%; padding:14px; margin:10px 0; border-radius:10px; background:#1a1a1a; border:1px solid #333; color:white;">
-        <button onclick="handleAuth()" style="width:100%; padding:14px; background:var(--pw-blue); border:none; color:white; border-radius:10px; font-weight:bold;">Login</button>
+    <div style="background:var(--pw-card); padding:30px; border-radius:20px; width:100%; max-width:350px; text-align:center;">
+        <input type="email" id="u-email" placeholder="Email" style="width:100%; padding:14px; margin:10px 0; background:#1a1a1a; border:1px solid #333; color:white; border-radius:10px;">
+        <input type="password" id="u-pass" placeholder="Password" style="width:100%; padding:14px; margin:10px 0; background:#1a1a1a; border:1px solid #333; color:white; border-radius:10px;">
+        <button onclick="handleAuth()" style="width:100%; padding:14px; background:var(--pw-blue); color:white; border:none; border-radius:10px; font-weight:bold;">Login</button>
     </div>
 </div>
 
 <div id="main-app" class="hidden">
-    <nav>
+    <nav id="top-nav">
         <div class="logo-text" style="font-size: 1.8rem; margin: 0;">Pwice</div>
-        <div onclick="switchTab('chat')" style="font-size: 1.5rem; cursor: pointer;">✉️</div>
+        <div onclick="switchTab('chat')" class="chat-btn">✉️</div>
     </nav>
 
     <div id="feed-view" class="view-container"></div>
 
     <div id="chat-view" class="view-container hidden">
-        <div style="padding:15px; border-bottom:1px solid #262626; display:flex; align-items:center; gap:10px;">
-            <span onclick="switchTab('feed')" style="cursor:pointer;">⬅️</span> <b>Direct Messages</b>
+        <div style="padding:15px; border-bottom:1px solid #262626; display:flex; align-items:center; gap:15px;">
+            <span onclick="switchTab('feed')" style="font-size:1.5rem; cursor:pointer;">⬅️</span> <b>Chats</b>
         </div>
         <div class="message-box" id="msg-list"></div>
         <div class="chat-input-area">
             <input type="text" id="chat-input" class="chat-input" placeholder="Message...">
-            <button onclick="sendMsg()" style="color:var(--pw-blue); background:none; border:none; font-weight:bold; padding-right:15px;">Send</button>
+            <button onclick="sendMsg()" style="color:var(--pw-blue); background:none; border:none; font-weight:bold; padding:0 10px;">Send</button>
         </div>
     </div>
 
     <div id="profile-view" class="view-container hidden" style="text-align:center; padding-top:50px;">
-        <h3 id="p-name">User</h3>
+        <h3 id="p-name"></h3>
         <button onclick="logout()" style="background:#e74c3c; color:white; border:none; padding:10px 20px; border-radius:8px;">Logout</button>
     </div>
 
-    <div class="bottom-bar" id="nav-bar">
-        <span onclick="switchTab('feed')">🏠</span>
-        <span onclick="alert('Search soon!')">🔍</span>
-        <span onclick="switchTab('profile')">👤</span>
+    <div class="bottom-bar" id="bottom-nav">
+        <div onclick="switchTab('feed')">🏠</div>
+        <div onclick="switchTab('profile')">👤</div>
     </div>
 </div>
 
@@ -99,17 +105,23 @@
         }
     }
 
+    // ✅ RE-WRITTEN SWITCH TAB (Ekdum pakka click kaam karega)
     function switchTab(tab) {
+        // Sabko hide karo
         document.getElementById('feed-view').classList.add('hidden');
         document.getElementById('chat-view').classList.add('hidden');
         document.getElementById('profile-view').classList.add('hidden');
-        document.getElementById('nav-bar').classList.remove('hidden');
+        document.getElementById('top-nav').classList.remove('hidden');
+        document.getElementById('bottom-nav').classList.remove('hidden');
 
-        if(tab === 'feed') document.getElementById('feed-view').classList.remove('hidden');
-        if(tab === 'profile') document.getElementById('profile-view').classList.remove('hidden');
-        if(tab === 'chat') {
+        if(tab === 'feed') {
+            document.getElementById('feed-view').classList.remove('hidden');
+        } else if(tab === 'profile') {
+            document.getElementById('profile-view').classList.remove('hidden');
+        } else if(tab === 'chat') {
             document.getElementById('chat-view').classList.remove('hidden');
-            document.getElementById('nav-bar').classList.add('hidden');
+            document.getElementById('top-nav').classList.add('hidden'); // Chat mein top bar hide
+            document.getElementById('bottom-nav').classList.add('hidden'); // Chat mein bottom bar hide
         }
     }
 
@@ -124,10 +136,10 @@
 
     async function sendMsg() {
         const input = document.getElementById('chat-input');
-        if(!input.value) return;
+        if(!input || !input.value.trim()) return;
         await _supabase.from('messages').insert([{ 
             sender_id: currentUser.id, 
-            receiver_id: '80d0ff80-d0ff-80d0-ff80-d0ff80d0ff80', 
+            receiver_id: currentUser.id, // Abhi testing ke liye khud ko hi bhej rahe hain
             text: input.value 
         }]);
         input.value = '';
