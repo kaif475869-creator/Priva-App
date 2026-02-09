@@ -15,16 +15,15 @@
         #loader { height: 100vh; display: flex; justify-content: center; align-items: center; background: #000; position: fixed; width: 100%; z-index: 9999; }
         nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pw-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 12px 0; font-size: 1.6rem; z-index: 100; }
-        .view-container { height: calc(100vh - 120px); overflow-y: auto; }
+        .view-container { height: calc(100vh - 120px); overflow-y: auto; width: 100%; }
         
-        /* Advance Chat UI */
-        .message-box { padding: 15px; display: flex; flex-direction: column; gap: 8px; height: calc(100% - 70px); overflow-y: auto; }
+        /* Chat Design */
+        .message-box { padding: 15px; display: flex; flex-direction: column; gap: 8px; height: 80%; }
         .msg { max-width: 70%; padding: 10px 14px; border-radius: 18px; font-size: 0.95rem; }
         .msg.sent { align-self: flex-end; background: var(--pw-blue); border-bottom-right-radius: 4px; }
         .msg.received { align-self: flex-start; background: #262626; border-bottom-left-radius: 4px; }
-        .typing-indicator { font-size: 0.8rem; color: #0095f6; padding: 5px 15px; font-style: italic; }
-        .chat-input-area { position: fixed; bottom: 0; width: 100%; background: #000; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #262626; }
-        .chat-input { flex: 1; background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px 18px; border-radius: 25px; outline: none; }
+        .chat-input-area { position: fixed; bottom: 0; width: 100%; background: #000; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #262626; z-index: 200; }
+        .chat-input { flex: 1; background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 25px; outline: none; }
     </style>
 </head>
 <body>
@@ -33,7 +32,7 @@
 
 <div id="auth-page" class="hidden" style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
     <div class="logo-text">Pwice</div>
-    <div style="background:var(--pw-card); padding:30px; border-radius:20px; width:100%; max-width:350px; text-align:center;">
+    <div style="background:var(--pw-card); padding:30px; border-radius:20px; width:100%; max-width:350px; text-align:center; border:1px solid #262626;">
         <input type="email" id="u-email" placeholder="Email" style="width:100%; padding:14px; margin:10px 0; border-radius:10px; background:#1a1a1a; border:1px solid #333; color:white;">
         <input type="password" id="u-pass" placeholder="Password" style="width:100%; padding:14px; margin:10px 0; border-radius:10px; background:#1a1a1a; border:1px solid #333; color:white;">
         <button onclick="handleAuth()" style="width:100%; padding:14px; background:var(--pw-blue); border:none; color:white; border-radius:10px; font-weight:bold;">Login</button>
@@ -41,22 +40,32 @@
 </div>
 
 <div id="main-app" class="hidden">
-    <nav><div class="logo-text" style="font-size: 1.8rem; margin: 0;">Pwice</div><div onclick="switchTab('chat')" style="cursor:pointer;">✉️</div></nav>
+    <nav>
+        <div class="logo-text" style="font-size: 1.8rem; margin: 0;">Pwice</div>
+        <div onclick="switchTab('chat')" style="font-size: 1.5rem; cursor: pointer;">✉️</div>
+    </nav>
+
     <div id="feed-view" class="view-container"></div>
+
     <div id="chat-view" class="view-container hidden">
-        <div style="padding:15px; border-bottom:1px solid #262626; display:flex; justify-content:space-between;">
-            <span onclick="switchTab('feed')">⬅️ <b>Direct</b></span>
-            <span id="seen-label" style="font-size:0.8rem; color:#8e8e8e;"></span>
+        <div style="padding:15px; border-bottom:1px solid #262626; display:flex; align-items:center; gap:10px;">
+            <span onclick="switchTab('feed')" style="cursor:pointer;">⬅️</span> <b>Direct Messages</b>
         </div>
         <div class="message-box" id="msg-list"></div>
-        <div id="typing-status" class="typing-indicator hidden">Typing...</div>
         <div class="chat-input-area">
-            <input type="text" id="chat-input" class="chat-input" placeholder="Message..." oninput="updateTyping()">
-            <button onclick="sendMsg()" style="color:var(--pw-blue); background:none; border:none; font-weight:bold;">Send</button>
+            <input type="text" id="chat-input" class="chat-input" placeholder="Message...">
+            <button onclick="sendMsg()" style="color:var(--pw-blue); background:none; border:none; font-weight:bold; padding-right:15px;">Send</button>
         </div>
     </div>
+
+    <div id="profile-view" class="view-container hidden" style="text-align:center; padding-top:50px;">
+        <h3 id="p-name">User</h3>
+        <button onclick="logout()" style="background:#e74c3c; color:white; border:none; padding:10px 20px; border-radius:8px;">Logout</button>
+    </div>
+
     <div class="bottom-bar" id="nav-bar">
         <span onclick="switchTab('feed')">🏠</span>
+        <span onclick="alert('Search soon!')">🔍</span>
         <span onclick="switchTab('profile')">👤</span>
     </div>
 </div>
@@ -67,7 +76,6 @@
     const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
     let currentUser = null;
-    let typingTimer;
 
     async function init() {
         const { data: { session } } = await _supabase.auth.getSession();
@@ -82,8 +90,9 @@
         if (session) {
             document.getElementById('auth-page').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
-            listenMessages();
+            document.getElementById('p-name').innerText = session.user.email;
             fetchFeed();
+            listenMessages();
         } else {
             document.getElementById('auth-page').classList.remove('hidden');
             document.getElementById('main-app').classList.add('hidden');
@@ -91,18 +100,24 @@
     }
 
     function switchTab(tab) {
-        document.getElementById('feed-view').classList.toggle('hidden', tab !== 'feed');
-        document.getElementById('chat-view').classList.toggle('hidden', tab !== 'chat');
-        document.getElementById('nav-bar').classList.toggle('hidden', tab === 'chat');
+        document.getElementById('feed-view').classList.add('hidden');
+        document.getElementById('chat-view').classList.add('hidden');
+        document.getElementById('profile-view').classList.add('hidden');
+        document.getElementById('nav-bar').classList.remove('hidden');
+
+        if(tab === 'feed') document.getElementById('feed-view').classList.remove('hidden');
+        if(tab === 'profile') document.getElementById('profile-view').classList.remove('hidden');
+        if(tab === 'chat') {
+            document.getElementById('chat-view').classList.remove('hidden');
+            document.getElementById('nav-bar').classList.add('hidden');
+        }
     }
 
-    // REAL-TIME MESSAGING LOGIC
     function listenMessages() {
         _supabase.channel('messages').on('postgres_changes', { event: 'INSERT', table: 'messages' }, payload => {
             const list = document.getElementById('msg-list');
             const isSent = payload.new.sender_id === currentUser.id;
             list.innerHTML += `<div class="msg ${isSent ? 'sent' : 'received'}">${payload.new.text}</div>`;
-            if(!isSent) document.getElementById('seen-label').innerText = "Seen just now";
             list.scrollTop = list.scrollHeight;
         }).subscribe();
     }
@@ -112,24 +127,16 @@
         if(!input.value) return;
         await _supabase.from('messages').insert([{ 
             sender_id: currentUser.id, 
-            receiver_id: '80d0ff80-d0ff-80d0-ff80-d0ff80d0ff80', // Dummy receiver ID (fix later)
+            receiver_id: '80d0ff80-d0ff-80d0-ff80-d0ff80d0ff80', 
             text: input.value 
         }]);
         input.value = '';
     }
 
-    function updateTyping() {
-        document.getElementById('typing-status').classList.remove('hidden');
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(() => {
-            document.getElementById('typing-status').classList.add('hidden');
-        }, 1500);
-    }
-
     async function fetchFeed() {
         const { data } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
         const feed = document.getElementById('feed-view'); feed.innerHTML = '';
-        data?.forEach(p => feed.innerHTML += `<div style="padding:15px; border-bottom:1px solid #1a1a1a;"><img src="${p.image_url}" style="width:100%; border-radius:12px;"></div>`);
+        data?.forEach(p => feed.innerHTML += `<div style="padding:15px;"><img src="${p.image_url}" style="width:100%; border-radius:12px;"></div>`);
     }
 
     async function handleAuth() {
@@ -137,6 +144,8 @@
         const pass = document.getElementById('u-pass').value;
         await _supabase.auth.signInWithPassword({ email, password: pass });
     }
+
+    async function logout() { await _supabase.auth.signOut(); }
 
     window.onload = init;
 </script>
