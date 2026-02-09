@@ -19,12 +19,10 @@
         
         /* Advance Chat UI */
         .message-box { padding: 15px; display: flex; flex-direction: column; gap: 8px; height: calc(100% - 70px); overflow-y: auto; }
-        .msg { max-width: 70%; padding: 10px 14px; border-radius: 18px; font-size: 0.95rem; position: relative; }
+        .msg { max-width: 70%; padding: 10px 14px; border-radius: 18px; font-size: 0.95rem; }
         .msg.sent { align-self: flex-end; background: var(--pw-blue); border-bottom-right-radius: 4px; }
         .msg.received { align-self: flex-start; background: #262626; border-bottom-left-radius: 4px; }
-        .seen-status { font-size: 0.7rem; color: #8e8e8e; align-self: flex-end; margin-top: -5px; margin-right: 5px; }
         .typing-indicator { font-size: 0.8rem; color: #0095f6; padding: 5px 15px; font-style: italic; }
-        
         .chat-input-area { position: fixed; bottom: 0; width: 100%; background: #000; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #262626; }
         .chat-input { flex: 1; background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px 18px; border-radius: 25px; outline: none; }
     </style>
@@ -44,9 +42,7 @@
 
 <div id="main-app" class="hidden">
     <nav><div class="logo-text" style="font-size: 1.8rem; margin: 0;">Pwice</div><div onclick="switchTab('chat')" style="cursor:pointer;">✉️</div></nav>
-    
     <div id="feed-view" class="view-container"></div>
-
     <div id="chat-view" class="view-container hidden">
         <div style="padding:15px; border-bottom:1px solid #262626; display:flex; justify-content:space-between;">
             <span onclick="switchTab('feed')">⬅️ <b>Direct</b></span>
@@ -55,14 +51,12 @@
         <div class="message-box" id="msg-list"></div>
         <div id="typing-status" class="typing-indicator hidden">Typing...</div>
         <div class="chat-input-area">
-            <input type="text" id="chat-input" class="chat-input" placeholder="Message..." oninput="sendTyping()">
-            <button onclick="sendMsg()" style="color:var(--pw-blue); background:none; border:none; font-weight:bold; padding-right:10px;">Send</button>
+            <input type="text" id="chat-input" class="chat-input" placeholder="Message..." oninput="updateTyping()">
+            <button onclick="sendMsg()" style="color:var(--pw-blue); background:none; border:none; font-weight:bold;">Send</button>
         </div>
     </div>
-
     <div class="bottom-bar" id="nav-bar">
         <span onclick="switchTab('feed')">🏠</span>
-        <span onclick="alert('Search coming soon!')">🔍</span>
         <span onclick="switchTab('profile')">👤</span>
     </div>
 </div>
@@ -73,7 +67,7 @@
     const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
     let currentUser = null;
-    let typingTimeout;
+    let typingTimer;
 
     async function init() {
         const { data: { session } } = await _supabase.auth.getSession();
@@ -88,6 +82,7 @@
         if (session) {
             document.getElementById('auth-page').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
+            listenMessages();
             fetchFeed();
         } else {
             document.getElementById('auth-page').classList.remove('hidden');
@@ -99,29 +94,36 @@
         document.getElementById('feed-view').classList.toggle('hidden', tab !== 'feed');
         document.getElementById('chat-view').classList.toggle('hidden', tab !== 'chat');
         document.getElementById('nav-bar').classList.toggle('hidden', tab === 'chat');
-        if(tab === 'chat') markSeen();
     }
 
-    // Typing Feature
-    function sendTyping() {
-        // Realtime signal yahan jayega (requires Presence)
-        console.log("Typing...");
-        clearTimeout(typingTimeout);
-        typingTimeout = setTimeout(() => { /* stop typing */ }, 2000);
+    // REAL-TIME MESSAGING LOGIC
+    function listenMessages() {
+        _supabase.channel('messages').on('postgres_changes', { event: 'INSERT', table: 'messages' }, payload => {
+            const list = document.getElementById('msg-list');
+            const isSent = payload.new.sender_id === currentUser.id;
+            list.innerHTML += `<div class="msg ${isSent ? 'sent' : 'received'}">${payload.new.text}</div>`;
+            if(!isSent) document.getElementById('seen-label').innerText = "Seen just now";
+            list.scrollTop = list.scrollHeight;
+        }).subscribe();
     }
 
-    function sendMsg() {
+    async function sendMsg() {
         const input = document.getElementById('chat-input');
         if(!input.value) return;
-        const list = document.getElementById('msg-list');
-        list.innerHTML += `<div class="msg sent">${input.value}</div>`;
-        list.innerHTML += `<div class="seen-status">Delivered</div>`;
+        await _supabase.from('messages').insert([{ 
+            sender_id: currentUser.id, 
+            receiver_id: '80d0ff80-d0ff-80d0-ff80-d0ff80d0ff80', // Dummy receiver ID (fix later)
+            text: input.value 
+        }]);
         input.value = '';
-        list.scrollTop = list.scrollHeight;
     }
 
-    function markSeen() {
-        document.getElementById('seen-label').innerText = "Seen just now";
+    function updateTyping() {
+        document.getElementById('typing-status').classList.remove('hidden');
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => {
+            document.getElementById('typing-status').classList.add('hidden');
+        }, 1500);
     }
 
     async function fetchFeed() {
