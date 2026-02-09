@@ -14,7 +14,7 @@
         body { margin: 0; font-family: -apple-system, sans-serif; background: var(--pw-dark); color: var(--pw-text); overflow: hidden; }
         .hidden { display: none !important; }
         
-        /* Stylish Logo */
+        /* 🔥 Stylish Logo */
         .logo-text { 
             font-size: 3.5rem; font-weight: 900; font-style: italic; display: inline-block;
             background: var(--pw-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
@@ -24,12 +24,12 @@
         /* Loading Screen (Fixed logout issue) */
         #loader { height: 100vh; display: flex; justify-content: center; align-items: center; background: #000; position: fixed; width: 100%; z-index: 9999; }
 
-        /* App UI */
+        /* App Layout */
         nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pw-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 12px 0; font-size: 1.6rem; z-index: 100; }
         .view-container { height: calc(100vh - 120px); overflow-y: auto; }
 
-        /* Modal & Form */
+        /* Modal & UI */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: flex-end; }
         .modal-content { background: var(--pw-card); width: 100%; border-radius: 25px 25px 0 0; padding: 30px 20px; }
         .modal-input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; background: #2c2c2e; border: 1px solid #333; color: white; box-sizing: border-box; }
@@ -46,9 +46,10 @@
     <div class="logo-text">Pwice</div>
     <div class="login-card" style="background:var(--pw-card); padding:30px; border-radius:20px; width:100%; max-width:350px; text-align:center; border:1px solid #262626;">
         <h2 id="form-title">Login</h2>
-        <input type="email" id="u-email" placeholder="Email" class="modal-input">
+        <input type="email" id="u-email" placeholder="Email Address" class="modal-input">
         <input type="password" id="u-pass" placeholder="Password" class="modal-input">
         <button onclick="handleAuth()" class="btn-main">Login</button>
+        <p style="margin-top:20px; color:#8e8e8e; font-size:0.9rem;">No account? <span style="color:var(--pw-blue); cursor:pointer;" onclick="toggleForm()">Signup</span></p>
     </div>
 </div>
 
@@ -59,11 +60,12 @@
     </nav>
     <div id="feed-view" class="view-container"></div>
     <div id="chat-view" class="view-container hidden">
-        <div style="padding:15px; border-bottom:1px solid #262626;"><span onclick="switchTab('feed')">⬅️</span> <b>Direct</b></div>
+        <div style="padding:15px; border-bottom:1px solid #262626;"><span onclick="switchTab('feed')">⬅️</span> <b>Direct Messages</b></div>
         <div id="msg-list" style="padding:15px;"></div>
     </div>
     <div id="profile-view" class="view-container hidden" style="text-align:center; padding-top:40px;">
-        <h3 id="p-name">User</h3>
+        <img src="https://via.placeholder.com/150" style="width:100px; border-radius:50%;" id="p-img">
+        <h3 id="p-name">Loading Profile...</h3>
         <button onclick="logout()" style="background:#e74c3c; border:none; color:white; padding:10px 20px; border-radius:8px;">Logout</button>
     </div>
     <div class="bottom-bar">
@@ -78,18 +80,20 @@
     const supabaseKey = 'sb_publishable_W-5nmUs4gRcD0BDsv7BM9w_R6rpx87j'; 
     const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // ✅ REFRESH LOGOUT FIX
-    async function checkUser() {
+    let isLoginMode = true;
+
+    // ✅ FIXED REFRESH LOGOUT (Asynchronous check)
+    async function initApp() {
         const { data: { session } } = await _supabase.auth.getSession();
-        handleUserChange(session);
-        document.getElementById('loader').classList.add('hidden'); // Check hone ke baad loader hatao
+        renderView(session);
+        document.getElementById('loader').classList.add('hidden'); // Sirf tabhi loader hatega jab check ho jaye
     }
 
     _supabase.auth.onAuthStateChange((_event, session) => {
-        handleUserChange(session);
+        renderView(session);
     });
 
-    function handleUserChange(session) {
+    function renderView(session) {
         if (session) {
             document.getElementById('auth-page').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
@@ -101,13 +105,24 @@
         }
     }
 
-    window.onload = checkUser; // Jaise hi page load ho, session check karo
+    // Initialize checking on load
+    window.addEventListener('DOMContentLoaded', initApp);
 
     async function handleAuth() {
         const email = document.getElementById('u-email').value;
         const pass = document.getElementById('u-pass').value;
-        const { error } = await _supabase.auth.signInWithPassword({ email, password: pass });
-        if(error) alert(error.message);
+        if(isLoginMode) {
+            const { error } = await _supabase.auth.signInWithPassword({ email, password: pass });
+            if(error) alert(error.message);
+        } else {
+            const { error } = await _supabase.auth.signUp({ email, password: pass });
+            if(error) alert(error.message); else alert("Check email for OTP!");
+        }
+    }
+
+    function toggleForm() {
+        isLoginMode = !isLoginMode;
+        document.getElementById('form-title').innerText = isLoginMode ? "Login" : "Sign Up";
     }
 
     function switchTab(tab) {
@@ -119,7 +134,7 @@
     async function fetchFeed() {
         const { data } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
         const feed = document.getElementById('feed-view'); feed.innerHTML = '';
-        data?.forEach(p => feed.innerHTML += `<div style="padding:15px;"><img src="${p.image_url}" style="width:100%; border-radius:12px;"></div>`);
+        data?.forEach(p => feed.innerHTML += `<div style="padding:15px; border-bottom:1px solid #1a1a1a;"><img src="${p.image_url}" style="width:100%; border-radius:12px;"></div>`);
     }
 
     async function logout() { await _supabase.auth.signOut(); }
