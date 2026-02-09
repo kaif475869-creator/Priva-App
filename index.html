@@ -1,311 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>Pwice - Global Private Connect</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-:root{
- --pw-blue:#0095f6;
- --pw-dark:#000;
- --pw-card:#1c1c1e;
- --pw-text:#fff;
- --pw-grad:linear-gradient(to right,#80d0ff,#b399ff,#d9b3ff);
-}
-
-/* 🔒 PURE APP BEHAVIOR */
-html, body{
- margin:0;
- height:100%;
- overscroll-behavior:none;
- touch-action:manipulation;
-}
-
-*{box-sizing:border-box}
-
-body{
- font-family:-apple-system, sans-serif;
- background:var(--pw-dark);
- color:var(--pw-text);
- overflow:hidden;
-}
-
-.hidden{display:none!important}
-
-.logo-text{
- font-size:3rem;
- font-weight:900;
- font-style:italic;
- background:var(--pw-grad);
- -webkit-background-clip:text;
- -webkit-text-fill-color:transparent;
- letter-spacing:-2px;
-}
-
-/* Loader */
-#loader{
- position:fixed;
- inset:0;
- display:flex;
- justify-content:center;
- align-items:center;
- background:#000;
- z-index:9999;
-}
-
-/* Navbar Fix for Better Click */
-nav{
- display:flex;
- justify-content:space-between;
- align-items:center;
- padding:10px 20px;
- border-bottom:1px solid #262626;
- position: relative;
- z-index: 10;
-}
-
-/* 🔥 BIG CLICK TARGET FOR MOBILE */
-.chat-icon-btn{
- font-size:1.8rem;
- background:none;
- border:none;
- color:white;
- cursor:pointer;
- padding: 10px 15px; /* Larger area */
- -webkit-tap-highlight-color: transparent;
-}
-
-/* Views */
-.view-container{
- height:calc(100vh - 120px);
- overflow-y:auto;
- -webkit-overflow-scrolling: touch;
-}
-
-/* Bottom Nav */
-.bottom-bar{
- position:fixed;
- bottom:0;
- width:100%;
- display:flex;
- justify-content:space-around;
- padding:15px 0;
- border-top:1px solid #262626;
- background:#000;
- font-size:1.8rem;
- z-index: 10;
-}
-
-/* Chat Full Screen (Instagram Style) */
-#chat-view{
- position:fixed;
- inset:0;
- background:#000;
- z-index:1000;
- display:flex;
- flex-direction:column;
-}
-
-.chat-header{
- display:flex;
- align-items:center;
- gap:10px;
- padding:15px;
- border-bottom:1px solid #262626;
-}
-
-.message-box{
- flex:1;
- padding:15px;
- overflow-y:auto;
- display:flex;
- flex-direction:column;
- gap:8px;
-}
-
-.msg{
- max-width:75%;
- padding:10px 14px;
- border-radius:18px;
- font-size:1rem;
-}
-
-.sent{
- align-self:flex-end;
- background:var(--pw-blue);
- border-bottom-right-radius:4px;
-}
-
-.received{
- align-self:flex-start;
- background:#262626;
- border-bottom-left-radius:4px;
-}
-
-/* 🌟 Seen & Typing Styling */
-.status-text{
- font-size: 0.75rem;
- color: #8e8e8e;
- padding: 0 15px 5px;
- font-style: italic;
-}
-
-.chat-input-area{
- display:flex;
- gap:10px;
- padding:10px;
- border-top:1px solid #262626;
- background: #000;
-}
-
-.chat-input{
- flex:1;
- padding:12px 18px;
- border-radius:25px;
- border:1px solid #333;
- background:#1a1a1a;
- color:white;
- outline:none;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pwice</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --pw-blue: #0095f6; --pw-dark: #000; --pw-text: #fff; --pw-grad: linear-gradient(to right, #80d0ff, #b399ff, #d9b3ff); }
+        body { margin: 0; font-family: -apple-system, sans-serif; background: var(--pw-dark); color: var(--pw-text); height: 100vh; overflow: hidden; }
+        .hidden { display: none !important; }
+        .logo-text { font-size: 2rem; font-weight: 900; font-style: italic; background: var(--pw-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        #loader { height: 100vh; display: flex; justify-content: center; align-items: center; background: #000; position: fixed; width: 100%; z-index: 9999; }
+        nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 12px 20px; display: flex; justify-content: center; align-items: center; }
+        .view-container { height: calc(100vh - 130px); overflow-y: auto; width: 100%; -webkit-overflow-scrolling: touch; }
+        .msg-list { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 75%; padding: 12px 16px; border-radius: 20px; font-size: 1rem; }
+        .msg.sent { align-self: flex-end; background: var(--pw-blue); border-bottom-right-radius: 4px; }
+        .msg.received { align-self: flex-start; background: #262626; border-bottom-left-radius: 4px; }
+        .chat-input-bar { position: fixed; bottom: 0; width: 100%; background: #000; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #262626; z-index: 1000; }
+        .chat-input { flex: 1; background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px 18px; border-radius: 25px; outline: none; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--pw-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 15px 0; z-index: 900; }
+        .nav-item { font-size: 1.8rem; cursor: pointer; padding: 5px 15px; }
+    </style>
 </head>
-
 <body>
 
 <div id="loader"><div class="logo-text">Pwice</div></div>
 
 <div id="main-app" class="hidden">
+    <nav id="top-bar"><div class="logo-text">Pwice</div></nav>
 
-<nav id="top-nav">
- <div class="logo-text" style="font-size:1.8rem">Pwice</div>
- <button class="chat-icon-btn" onclick="switchTab('chat')">✉️</button>
-</nav>
+    <div id="feed-view" class="view-container"></div>
 
-<div id="feed-view" class="view-container"></div>
+    <div id="chat-view" class="view-container hidden">
+        <div style="padding:15px; border-bottom:1px solid #262626; font-weight:bold;">Direct Messages</div>
+        <div class="msg-list" id="msg-box"></div>
+        <div id="typing-ui" style="font-size:0.8rem; color:var(--pw-blue); padding-left:15px;" class="hidden">typing...</div>
+        <div class="chat-input-bar">
+            <input type="text" id="chat-input" class="chat-input" placeholder="Message..." oninput="showTyping()">
+            <button onclick="sendMsg()" style="color:var(--pw-blue); background:none; border:none; font-weight:bold;">Send</button>
+        </div>
+    </div>
 
-<div id="chat-view" class="hidden">
- <div class="chat-header">
-  <span style="cursor:pointer;font-size:1.8rem;padding:5px" onclick="switchTab('feed')">⬅️</span>
-  <b>Direct</b>
-  <span id="seen-status" style="margin-left:auto; font-size:0.7rem; color:#8e8e8e;"></span>
- </div>
+    <div id="profile-view" class="view-container hidden" style="text-align:center; padding:40px;">
+        <h3 id="user-email">User</h3>
+        <button onclick="logout()" style="background:#e74c3c; color:white; border:none; padding:10px 20px; border-radius:10px;">Logout</button>
+    </div>
 
- <div id="msg-list" class="message-box"></div>
- 
- <div id="typing-indicator" class="status-text hidden">typing...</div>
-
- <div class="chat-input-area">
-  <input id="chat-input" class="chat-input" placeholder="Message..." oninput="handleTyping()">
-  <button onclick="sendMsg()" style="color:var(--pw-blue);background:none;border:none;font-weight:bold;font-size:1rem;padding:0 10px;">Send</button>
- </div>
-</div>
-
-<div id="profile-view" class="view-container hidden" style="text-align:center;padding-top:50px">
- <h3 id="p-name"></h3>
- <button onclick="logout()" style="background:#e74c3c;color:white;border:none;padding:12px 24px;border-radius:10px;font-weight:bold">Logout</button>
-</div>
-
-<div id="bottom-nav" class="bottom-bar">
- <div onclick="switchTab('feed')">🏠</div>
- <div onclick="switchTab('profile')">👤</div>
-</div>
-
+    <div class="bottom-nav" id="bottom-bar">
+        <div class="nav-item" onclick="changeTab('feed')">🏠</div>
+        <div class="nav-item" onclick="changeTab('chat')">✉️</div>
+        <div class="nav-item" onclick="changeTab('profile')">👤</div>
+    </div>
 </div>
 
 <script>
-const supabaseUrl='https://xgxmbfbuplkzwnrueusy.supabase.co';
-const supabaseKey='sb_publishable_W-5nmUs4gRcD0BDsv7BM9w_R6rpx87j';
-const _supabase=supabase.createClient(supabaseUrl,supabaseKey);
+    const supabaseUrl = 'https://xgxmbfbuplkzwnrueusy.supabase.co'; 
+    const supabaseKey = 'sb_publishable_W-5nmUs4gRcD0BDsv7BM9w_R6rpx87j'; 
+    const _pw = supabase.createClient(supabaseUrl, supabaseKey);
 
-let currentUserId = null;
-let typingTimeout;
+    let myId = null;
+    let tTimer;
 
-async function init(){
- const {data:{session}}=await _supabase.auth.getSession();
- if(session) {
-    updateUI(session);
- } else {
-    // Agar session na ho toh refresh fix ke liye
-    _supabase.auth.onAuthStateChange((_e,s) => updateUI(s));
- }
- document.getElementById('loader').classList.add('hidden');
-}
+    async function startApp() {
+        const { data: { session } } = await _pw.auth.getSession();
+        if(session) {
+            myId = session.user.id;
+            document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('user-email').innerText = session.user.email;
+            loadPosts();
+            initRealtime(myId);
+        } else {
+            // Agar logout hai toh redirect ya alert
+            alert("Please login again");
+        }
+        document.getElementById('loader').classList.add('hidden');
+    }
 
-function updateUI(session){
- if(session){
-  currentUserId = session.user.id;
-  document.getElementById('main-app').classList.remove('hidden');
-  document.getElementById('p-name').innerText=session.user.email;
-  fetchFeed();
-  listenMessages(session.user.id);
- }
-}
+    function changeTab(t) {
+        document.getElementById('feed-view').classList.add('hidden');
+        document.getElementById('chat-view').classList.add('hidden');
+        document.getElementById('profile-view').classList.add('hidden');
+        document.getElementById('bottom-bar').classList.remove('hidden');
 
-function switchTab(tab){
- ['feed-view','profile-view','chat-view'].forEach(v=>document.getElementById(v).classList.add('hidden'));
- document.getElementById('top-nav').classList.remove('hidden');
- document.getElementById('bottom-nav').classList.remove('hidden');
+        if(t === 'feed') document.getElementById('feed-view').classList.remove('hidden');
+        if(t === 'profile') document.getElementById('profile-view').classList.remove('hidden');
+        if(t === 'chat') {
+            document.getElementById('chat-view').classList.remove('hidden');
+            document.getElementById('bottom-bar').classList.add('hidden');
+        }
+    }
 
- if(tab==='feed')document.getElementById('feed-view').classList.remove('hidden');
- if(tab==='profile')document.getElementById('profile-view').classList.remove('hidden');
- if(tab==='chat'){
-  document.getElementById('chat-view').classList.remove('hidden');
-  document.getElementById('top-nav').classList.add('hidden');
-  document.getElementById('bottom-nav').classList.add('hidden');
-  // 🌟 Mark as Seen logic
-  document.getElementById('seen-status').innerText = "Seen just now";
- }
-}
+    function initRealtime(uid) {
+        _pw.channel('messages').on('postgres_changes', { event: 'INSERT', table: 'messages' }, p => {
+            const box = document.getElementById('msg-box');
+            const isMe = p.new.sender_id === uid;
+            box.innerHTML += `<div class="msg ${isMe ? 'sent' : 'received'}">${p.new.text}</div>`;
+            box.scrollTop = box.scrollHeight;
+        }).subscribe();
+    }
 
-function listenMessages(uid){
- _supabase.channel('messages')
- .on('postgres_changes',{event:'INSERT',table:'messages'},payload=>{
-  const isMe=payload.new.sender_id===uid;
-  const list = document.getElementById('msg-list');
-  list.innerHTML+= `<div class="msg ${isMe?'sent':'received'}">${payload.new.text}</div>`;
-  list.scrollTop = list.scrollHeight;
- }).subscribe();
-}
+    async function sendMsg() {
+        const input = document.getElementById('chat-input');
+        if(!input.value.trim()) return;
+        await _pw.from('messages').insert([{ sender_id: myId, receiver_id: myId, text: input.value }]);
+        input.value = '';
+    }
 
-// 🌟 Typing Logic
-function handleTyping() {
-    document.getElementById('typing-indicator').classList.remove('hidden');
-    clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(() => {
-        document.getElementById('typing-indicator').classList.add('hidden');
-    }, 1500);
-}
+    function showTyping() {
+        document.getElementById('typing-ui').classList.remove('hidden');
+        clearTimeout(tTimer);
+        tTimer = setTimeout(() => document.getElementById('typing-ui').classList.add('hidden'), 1500);
+    }
 
-async function sendMsg(){
- const input=document.getElementById('chat-input');
- if(!input.value.trim() || !currentUserId) return;
- 
- await _supabase.from('messages').insert([{
-    sender_id: currentUserId,
-    receiver_id: currentUserId, // testing self-chat
-    text: input.value
- }]);
- input.value='';
-}
+    async function loadPosts() {
+        const { data } = await _pw.from('posts').select('*').order('created_at', { ascending: false });
+        const feed = document.getElementById('feed-view'); feed.innerHTML = '';
+        data?.forEach(p => feed.innerHTML += `<div style="padding:10px;"><img src="${p.image_url}" style="width:100%; border-radius:15px;"></div>`);
+    }
 
-async function fetchFeed(){
- const {data}=await _supabase.from('posts').select('*').order('created_at',{ascending:false});
- const feed=document.getElementById('feed-view');
- feed.innerHTML='';
- data?.forEach(p=>{
-  feed.innerHTML+=`<div style="padding:15px"><img src="${p.image_url}" style="width:100%;border-radius:15px;border:1px solid #1a1a1a"></div>`;
- });
-}
-
-async function logout(){await _supabase.auth.signOut(); window.location.reload();}
-
-window.onload=init;
+    async function logout() { await _pw.auth.signOut(); window.location.reload(); }
+    window.onload = startApp;
 </script>
-
 </body>
 </html>
