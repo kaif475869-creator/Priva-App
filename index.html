@@ -11,31 +11,31 @@
         body { margin: 0; font-family: -apple-system, sans-serif; background: var(--pw-dark); color: var(--pw-text); overflow-x: hidden; }
         .hidden { display: none !important; }
         
-        /* 🔥 Pwice Logo Style */
+        /* 🔥 Pwice Logo - Perfect Gradient & Padding */
+        .logo-container { padding: 10px; display: inline-block; text-align: center; width: 100%; }
         .logo-text { 
-            font-size: 3.5rem; font-weight: 900; font-style: italic; display: inline-block;
+            font-size: 3.8rem; font-weight: 900; font-style: italic; display: inline-block;
             background: linear-gradient(to right, #80d0ff 0%, #b399ff 50%, #d9b3ff 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             letter-spacing: -2px; font-family: 'Arial Black', sans-serif; padding-right: 20px; line-height: 1.2;
         }
 
-        /* App UI */
-        nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pw-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 15px 0; font-size: 1.6rem; z-index: 100; }
-        .reels-container { height: calc(100vh - 120px); overflow-y: scroll; scroll-snap-type: y mandatory; }
-        .reel-video { height: 100%; width: 100%; scroll-snap-align: start; position: relative; background: #000; display: flex; align-items: center; justify-content: center; }
-
-        /* Profile Styles */
-        .profile-container { padding: 20px; text-align: center; }
-        .profile-pic { width: 100px; height: 100px; border-radius: 50%; border: 2px solid #333; object-fit: cover; margin-bottom: 15px; }
-        .bio-text { color: #8e8e8e; font-size: 0.9rem; margin-top: 5px; }
-        .edit-btn { background: #333; color: white; border: none; padding: 8px 20px; border-radius: 5px; margin-top: 15px; cursor: pointer; font-weight: bold; width: 100%; max-width: 200px; }
-
-        /* Auth Cards */
+        /* Auth UI */
         .auth-box { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
         .login-card { background: var(--pw-card); padding: 35px; border-radius: 20px; width: 100%; max-width: 360px; border: 1px solid #262626; text-align: center; }
-        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: #1a1a1a; color: white; box-sizing: border-box; outline: none; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: #1a1a1a; color: white; box-sizing: border-box; font-size: 1rem; outline: none; }
         .btn-main { width: 100%; padding: 14px; background: var(--pw-blue); border: none; color: white; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        
+        /* Main App UI */
+        nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pw-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 15px 0; font-size: 1.6rem; z-index: 100; }
+        .view-container { height: calc(100vh - 120px); overflow-y: auto; scroll-snap-type: y mandatory; }
+        .reel-video { height: 100%; width: 100%; scroll-snap-align: start; position: relative; background: #000; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #262626; }
+
+        /* Profile Style */
+        .profile-section { padding: 30px 20px; text-align: center; }
+        .profile-pic { width: 110px; height: 110px; border-radius: 50%; border: 3px solid #333; margin-bottom: 15px; object-fit: cover; }
+        .edit-profile-btn { background: #262626; color: white; border: 1px solid #333; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -48,35 +48,42 @@
         <input type="email" id="u-email" placeholder="Email Address">
         <input type="password" id="u-pass" placeholder="Password">
         <button class="btn-main" onclick="handleAuth()">Submit</button>
-        <p style="margin-top: 25px; font-size: 0.9rem; color: #8e8e8e;">Don't have an account? <span style="color: var(--pw-blue); cursor: pointer;" onclick="toggleForm()">Create Account</span></p>
+        <p style="margin-top: 25px; font-size: 0.9rem; color: #8e8e8e;">Don't have an account? <span style="color: var(--pw-blue); cursor: pointer; font-weight: bold;" onclick="toggleForm()">Create Account</span></p>
     </div>
+
     <div id="otp-screen" class="login-card hidden">
-        <h2>Verify OTP</h2>
-        <input type="number" id="otp-input" placeholder="000000" style="text-align: center; font-size: 1.5rem; letter-spacing: 5px;">
-        <button class="btn-main" onclick="verifyOTP()">Verify</button>
+        <h2>Verify Email</h2>
+        <p id="otp-msg" style="font-size: 0.8rem; color: #8e8e8e;">Humne code bhej diya hai...</p>
+        <input type="number" id="otp-input" placeholder="000000" style="text-align: center; font-size: 1.8rem; letter-spacing: 8px; font-weight: bold;">
+        <button class="btn-main" onclick="verifyOTP()">Verify & Finish</button>
+        <p style="margin-top: 20px;"><span style="color: var(--pw-blue); cursor: pointer;" onclick="location.reload()">Back</span></p>
     </div>
 </div>
 
 <div id="main-app" class="hidden">
-    <nav><div class="logo-text" style="font-size: 2rem; margin: 0;">Pwice</div><div>🔔 ✉️</div></nav>
-    
-    <div id="feed-view" class="reels-container"></div>
+    <nav>
+        <div class="logo-text" style="font-size: 2rem; margin: 0; letter-spacing: -1.5px;">Pwice</div>
+        <div style="font-size: 1.5rem;">🔔 ✉️</div>
+    </nav>
 
-    <div id="profile-view" class="profile-container hidden">
-        <img id="user-dp" src="https://via.placeholder.com/150" class="profile-pic">
-        <h3 id="user-name-display">Pwice User</h3>
-        <p id="user-bio" class="bio-text">No bio yet.</p>
-        <button class="edit-btn" onclick="updateProfile()">Edit Profile</button>
-        <hr style="border: 0.5px solid #262626; margin: 20px 0;">
-        <p>Aapki Posts yahan dikhengi</p>
+    <div id="feed-view" class="view-container"></div>
+
+    <div id="profile-view" class="view-container hidden">
+        <div class="profile-section">
+            <img src="https://via.placeholder.com/150" class="profile-pic" id="p-img">
+            <h3 id="p-name">Pwice User</h3>
+            <p id="p-bio" style="color: #8e8e8e;">No bio yet.</p>
+            <button class="edit-profile-btn" onclick="editProfile()">Edit Profile</button>
+            <div style="margin-top: 40px; border-top: 1px solid #262626; padding-top: 20px; color: #555;">No Posts Yet</div>
+        </div>
     </div>
 
     <div class="bottom-bar">
-        <span onclick="showView('feed')">🏠</span>
+        <span onclick="switchTab('feed')">🏠</span>
         <span>🔍</span>
         <span style="font-size: 2rem;">🎬</span>
         <span onclick="uploadPost()">➕</span>
-        <span onclick="showView('profile')">👤</span>
+        <span onclick="switchTab('profile')">👤</span>
     </div>
 </div>
 
@@ -96,12 +103,24 @@
     async function handleAuth() {
         const email = document.getElementById('u-email').value;
         const pass = document.getElementById('u-pass').value;
+        const name = document.getElementById('u-fullname').value;
+
+        if(!email || !pass) { alert("Sari details bhariye!"); return; }
+
         if (!isLogin) {
-            const { error } = await _supabase.auth.signUp({ email, password: pass });
-            if (!error) { document.getElementById('auth-form').classList.add('hidden'); document.getElementById('otp-screen').classList.remove('hidden'); }
+            const { data, error } = await _supabase.auth.signUp({ 
+                email, password: pass, options: { data: { full_name: name } } 
+            });
+            if (error) { 
+                alert("Auth Error: " + error.message); 
+            } else {
+                document.getElementById('auth-form').classList.add('hidden');
+                document.getElementById('otp-screen').classList.remove('hidden');
+                document.getElementById('otp-msg').innerText = "Code sent to: " + email;
+            }
         } else {
             const { data, error } = await _supabase.auth.signInWithPassword({ email, password: pass });
-            if (data.user) loginSuccess();
+            if (data.user) loginSuccess(); else alert("Error: " + error.message);
         }
     }
 
@@ -109,41 +128,46 @@
         const otp = document.getElementById('otp-input').value;
         const email = document.getElementById('u-email').value;
         const { error } = await _supabase.auth.verifyOtp({ email, token: otp, type: 'signup' });
-        if (!error) loginSuccess();
+        if (error) alert("Invalid Code: " + error.message); else loginSuccess();
     }
 
     function loginSuccess() {
         document.getElementById('auth-page').classList.add('hidden');
         document.getElementById('main-app').classList.remove('hidden');
-        showView('feed');
+        switchTab('feed');
     }
 
-    function showView(view) {
-        document.getElementById('feed-view').classList.toggle('hidden', view !== 'feed');
-        document.getElementById('profile-view').classList.toggle('hidden', view !== 'profile');
-        if(view === 'feed') fetchPosts();
+    function switchTab(tab) {
+        document.getElementById('feed-view').classList.toggle('hidden', tab !== 'feed');
+        document.getElementById('profile-view').classList.toggle('hidden', tab !== 'profile');
+        if(tab === 'feed') fetchFeed();
     }
 
-    async function fetchPosts() {
+    async function fetchFeed() {
         const { data } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
         const feed = document.getElementById('feed-view');
         feed.innerHTML = '';
-        data?.forEach(post => {
-            feed.innerHTML += `<div class="reel-video"><img src="${post.image_url}" style="width:100%; height:100%; object-fit:cover;"><div style="position:absolute; bottom:30px; left:20px;"><b>@user</b><br>${post.caption || ''}</div></div>`;
-        });
+        if(data?.length) {
+            data.forEach(p => {
+                feed.innerHTML += `<div class="reel-video"><img src="${p.image_url}" style="width:100%; height:100%; object-fit:cover;"><div style="position:absolute; bottom:25px; left:15px; text-shadow: 0 2px 4px #000;"><b>@user</b><br>${p.caption || ''}</div></div>`;
+            });
+        } else { feed.innerHTML = '<div class="reel-video">No posts yet. Tap ➕</div>'; }
     }
 
-    function updateProfile() {
-        const newBio = prompt("Apna Bio likhein:");
-        const newPic = prompt("Profile Photo URL:");
-        if(newBio) document.getElementById('user-bio').innerText = newBio;
-        if(newPic) document.getElementById('user-dp').src = newPic;
+    function editProfile() {
+        const n = prompt("Naya Naam:");
+        const b = prompt("Naya Bio:");
+        if(n) document.getElementById('p-name').innerText = n;
+        if(b) document.getElementById('p-bio').innerText = b;
     }
 
     async function uploadPost() {
-        const img = prompt("Image URL:");
+        const url = prompt("Photo/Video URL:");
         const cap = prompt("Caption:");
-        if (img) { await _supabase.from('posts').insert([{ image_url: img, caption: cap }]); fetchPosts(); }
+        if(url) {
+            await _supabase.from('posts').insert([{ image_url: url, caption: cap }]);
+            switchTab('feed');
+        }
     }
 </script>
 </body>
