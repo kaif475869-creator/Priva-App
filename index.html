@@ -238,29 +238,33 @@ async function init(){
 _supabase.auth.onAuthStateChange((_e,session)=>updateUI(session));
 
 function updateUI(session){
+ const authPage=document.getElementById('auth-page');
+ const mainApp=document.getElementById('main-app');
+ const pName=document.getElementById('p-name');
+
  if(session){
-  auth-page.classList.add('hidden');
-  main-app.classList.remove('hidden');
-  p-name.innerText=session.user.email;
+  authPage.classList.add('hidden');
+  mainApp.classList.remove('hidden');
+  pName.innerText=session.user.email;
   fetchFeed();
   listenMessages(session.user.id);
  }else{
-  auth-page.classList.remove('hidden');
-  main-app.classList.add('hidden');
+  authPage.classList.remove('hidden');
+  mainApp.classList.add('hidden');
  }
 }
 
 function switchTab(tab){
  ['feed-view','profile-view','chat-view'].forEach(v=>document.getElementById(v).classList.add('hidden'));
- top-nav.classList.remove('hidden');
- bottom-nav.classList.remove('hidden');
+ document.getElementById('top-nav').classList.remove('hidden');
+ document.getElementById('bottom-nav').classList.remove('hidden');
 
- if(tab==='feed')feed-view.classList.remove('hidden');
- if(tab==='profile')profile-view.classList.remove('hidden');
+ if(tab==='feed')document.getElementById('feed-view').classList.remove('hidden');
+ if(tab==='profile')document.getElementById('profile-view').classList.remove('hidden');
  if(tab==='chat'){
-  chat-view.classList.remove('hidden');
-  top-nav.classList.add('hidden');
-  bottom-nav.classList.add('hidden');
+  document.getElementById('chat-view').classList.remove('hidden');
+  document.getElementById('top-nav').classList.add('hidden');
+  document.getElementById('bottom-nav').classList.add('hidden');
  }
 }
 
@@ -271,13 +275,13 @@ function listenMessages(uid){
  _supabase.channel('messages')
  .on('postgres_changes',{event:'INSERT',table:'messages'},payload=>{
   const isSent=payload.new.sender_id===uid;
-  msg-list.innerHTML+=`<div class="msg ${isSent?'sent':'received'}">${payload.new.text}</div>`;
-  msg-list.scrollTop=msg-list.scrollHeight;
+  document.getElementById('msg-list').innerHTML+=
+   `<div class="msg ${isSent?'sent':'received'}">${payload.new.text}</div>`;
  }).subscribe();
 }
 
 async function sendMsg(){
- const input=chat-input;
+ const input=document.getElementById('chat-input');
  const {data:{user}}=await _supabase.auth.getUser();
  if(!input.value.trim())return;
  await _supabase.from('messages').insert([{sender_id:user.id,receiver_id:user.id,text:input.value}]);
@@ -286,16 +290,17 @@ async function sendMsg(){
 
 async function fetchFeed(){
  const {data}=await _supabase.from('posts').select('*').order('created_at',{ascending:false});
- feed-view.innerHTML='';
+ const feed=document.getElementById('feed-view');
+ feed.innerHTML='';
  data?.forEach(p=>{
-  feed-view.innerHTML+=`<div style="padding:15px"><img src="${p.image_url}" style="width:100%;border-radius:12px"></div>`;
+  feed.innerHTML+=`<div style="padding:15px"><img src="${p.image_url}" style="width:100%;border-radius:12px"></div>`;
  });
 }
 
 async function handleAuth(){
  await _supabase.auth.signInWithPassword({
-  email:u-email.value,
-  password:u-pass.value
+  email:document.getElementById('u-email').value,
+  password:document.getElementById('u-pass').value
  });
 }
 
