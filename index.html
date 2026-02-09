@@ -12,13 +12,26 @@
         :root { --pw-blue: #0095f6; --pw-dark: #000000; --pw-card: #121212; --pw-text: #ffffff; }
         body { margin: 0; font-family: sans-serif; background: var(--pw-dark); color: var(--pw-text); overflow-x: hidden; }
         .hidden { display: none !important; }
+        
+        /* NAYA LOGO STYLE (Jo aapne manga tha) */
+        .logo-text { 
+            font-size: 3.5rem; 
+            font-weight: 800; 
+            font-style: italic;
+            font-family: 'Trebuchet MS', sans-serif;
+            background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+        }
+
         .auth-box { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
         .login-card { background: var(--pw-card); padding: 30px; border-radius: 15px; width: 100%; max-width: 350px; border: 1px solid #262626; text-align: center; }
         input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: white; box-sizing: border-box; }
         .btn-main { width: 100%; padding: 12px; background: var(--pw-blue); border: none; color: white; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .toggle-text { margin-top: 20px; font-size: 0.9rem; color: #8e8e8e; }
         .toggle-text span { color: var(--pw-blue); cursor: pointer; font-weight: bold; }
-        .logo-text { font-size: 3rem; font-weight: bold; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; }
         
         nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .reels-container { height: calc(100vh - 120px); overflow-y: scroll; scroll-snap-type: y mandatory; }
@@ -44,7 +57,7 @@
 
     <div id="otp-screen" class="login-card hidden">
         <h2>Verify Email</h2>
-        <p style="font-size: 0.8rem; color: #8e8e8e;">Humein aapki email par 6-digit code bheja hai.</p>
+        <p style="font-size: 0.8rem; color: #8e8e8e;">Humein code bhej diya hai, check karein.</p>
         <input type="number" id="otp-input" placeholder="000000" style="text-align: center; font-size: 1.5rem; letter-spacing: 5px;">
         <button class="btn-main" onclick="verifyOTP()">Verify & Finish</button>
         <p class="toggle-text"><span onclick="location.reload()">Back</span></p>
@@ -52,7 +65,10 @@
 </div>
 
 <div id="main-app" class="hidden">
-    <nav><div class="logo-text" style="font-size: 1.5rem; margin: 0;">Pwice</div><div>🔔 ✉️</div></nav>
+    <nav>
+        <div class="logo-text" style="font-size: 1.8rem; margin: 0; font-style: italic;">Pwice</div>
+        <div>🔔 ✉️</div>
+    </nav>
     <div class="reels-container" id="reels-list">
         <div class="reel-video"><div style="color: #555;">[Reels Loading...]</div></div>
     </div>
@@ -87,7 +103,7 @@
         const pass = document.getElementById('u-pass').value;
         const fullName = document.getElementById('u-fullname').value;
 
-        if(!email || !pass) { alert("Email aur Password dono bhariye bhai!"); return; }
+        if(!email || !pass) { alert("Details bhariye bhai!"); return; }
 
         if (!isLogin) {
             const { error } = await _supabase.auth.signUp({
@@ -95,7 +111,6 @@
                 password: pass,
                 options: { data: { full_name: fullName } }
             });
-
             if (error) { alert("Signup Fail: " + error.message); } 
             else {
                 document.getElementById('auth-form').classList.add('hidden');
@@ -103,22 +118,16 @@
             }
         } else {
             const { data, error } = await _supabase.auth.signInWithPassword({ email: email, password: pass });
-            if (data.user) { loginSuccess(); } else { alert("Login failed! Details check karein."); }
+            if (data.user) { loginSuccess(); } else { alert("Login fail!"); }
         }
     }
 
     async function verifyOTP() {
         const otp = document.getElementById('otp-input').value;
         const email = document.getElementById('u-email').value;
-
-        const { error } = await _supabase.auth.verifyOtp({
-            email: email,
-            token: otp,
-            type: 'signup',
-        });
-
+        const { error } = await _supabase.auth.verifyOtp({ email: email, token: otp, type: 'signup' });
         if (error) { alert("Galat OTP!"); } 
-        else { alert("Email Verified! Pwice par swagat hai. 🎉"); loginSuccess(); }
+        else { alert("Pwice par swagat hai! 🎉"); loginSuccess(); }
     }
 
     function loginSuccess() {
@@ -136,7 +145,7 @@
                 reelsList.innerHTML += `
                     <div class="reel-video">
                         <img src="${post.image_url}" style="width:100%; height:100%; object-fit:cover;">
-                        <div class="reel-overlay"><b>@Pwice_User</b><br>${post.caption || ''}</div>
+                        <div class="reel-overlay"><b>@user</b><br>${post.caption || ''}</div>
                     </div>`;
             });
         } else {
