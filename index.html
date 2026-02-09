@@ -1,156 +1,308 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pwice - Global Private Connect</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root { --pw-blue: #0095f6; --pw-dark: #000000; --pw-card: #1c1c1e; --pw-text: #ffffff; --pw-grad: linear-gradient(to right, #80d0ff, #b399ff, #d9b3ff); }
-        body { margin: 0; font-family: -apple-system, sans-serif; background: var(--pw-dark); color: var(--pw-text); overflow: hidden; height: 100vh; }
-        .hidden { display: none !important; }
-        .logo-text { font-size: 3.5rem; font-weight: 900; font-style: italic; display: inline-block; background: var(--pw-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px; padding-right: 25px; line-height: 1.2; }
-        #loader { height: 100vh; display: flex; justify-content: center; align-items: center; background: #000; position: fixed; width: 100%; z-index: 9999; }
-        
-        /* Navbar with Clickable Chat */
-        nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .chat-icon-btn { font-size: 1.8rem; cursor: pointer; padding: 10px; border: none; background: none; color: white; outline: none; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pwice - Global Private Connect</title>
 
-        .view-container { height: calc(100vh - 130px); overflow-y: auto; width: 100%; }
-        
-        /* Chat UI */
-        .message-box { padding: 15px; display: flex; flex-direction: column; gap: 8px; height: 80%; }
-        .msg { max-width: 75%; padding: 10px 14px; border-radius: 18px; font-size: 1rem; color: white; }
-        .msg.sent { align-self: flex-end; background: var(--pw-blue); border-bottom-right-radius: 4px; }
-        .msg.received { align-self: flex-start; background: #262626; border-bottom-left-radius: 4px; }
-        
-        .chat-input-area { position: fixed; bottom: 0; width: 100%; background: #000; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #262626; }
-        .chat-input { flex: 1; background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 25px; outline: none; }
-        
-        .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pw-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 15px 0; font-size: 1.8rem; z-index: 100; }
-    </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+ --pw-blue:#0095f6;
+ --pw-dark:#000;
+ --pw-card:#1c1c1e;
+ --pw-text:#fff;
+ --pw-grad:linear-gradient(to right,#80d0ff,#b399ff,#d9b3ff);
+}
+
+*{box-sizing:border-box}
+body{
+ margin:0;
+ font-family:-apple-system, sans-serif;
+ background:var(--pw-dark);
+ color:var(--pw-text);
+ height:100vh;
+ overflow:hidden;
+}
+
+.hidden{display:none!important}
+
+.logo-text{
+ font-size:3rem;
+ font-weight:900;
+ font-style:italic;
+ background:var(--pw-grad);
+ -webkit-background-clip:text;
+ -webkit-text-fill-color:transparent;
+ letter-spacing:-2px;
+}
+
+/* Loader */
+#loader{
+ position:fixed;
+ inset:0;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ background:#000;
+ z-index:9999;
+}
+
+/* Auth */
+#auth-page{
+ height:100vh;
+ display:flex;
+ flex-direction:column;
+ justify-content:center;
+ align-items:center;
+ padding:20px;
+}
+
+input{
+ width:100%;
+ padding:14px;
+ margin:10px 0;
+ background:#1a1a1a;
+ border:1px solid #333;
+ color:white;
+ border-radius:10px;
+ outline:none;
+}
+
+/* Navbar */
+nav{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ padding:10px 20px;
+ border-bottom:1px solid #262626;
+}
+
+.chat-icon-btn{
+ font-size:1.7rem;
+ background:none;
+ border:none;
+ color:white;
+ cursor:pointer;
+}
+
+/* Views */
+.view-container{
+ height:calc(100vh - 120px);
+ overflow-y:auto;
+}
+
+/* Bottom Nav */
+.bottom-bar{
+ position:fixed;
+ bottom:0;
+ width:100%;
+ display:flex;
+ justify-content:space-around;
+ padding:15px 0;
+ border-top:1px solid #262626;
+ background:#000;
+ font-size:1.8rem;
+}
+
+/* Chat Full Screen */
+#chat-view{
+ position:fixed;
+ inset:0;
+ background:#000;
+ z-index:999;
+ display:flex;
+ flex-direction:column;
+}
+
+.chat-header{
+ display:flex;
+ align-items:center;
+ gap:10px;
+ padding:15px;
+ border-bottom:1px solid #262626;
+}
+
+.message-box{
+ flex:1;
+ padding:15px;
+ overflow-y:auto;
+ display:flex;
+ flex-direction:column;
+ gap:8px;
+}
+
+.msg{
+ max-width:75%;
+ padding:10px 14px;
+ border-radius:18px;
+ font-size:1rem;
+}
+
+.sent{
+ align-self:flex-end;
+ background:var(--pw-blue);
+ border-bottom-right-radius:4px;
+}
+
+.received{
+ align-self:flex-start;
+ background:#262626;
+ border-bottom-left-radius:4px;
+}
+
+.chat-input-area{
+ display:flex;
+ gap:10px;
+ padding:10px;
+ border-top:1px solid #262626;
+}
+
+.chat-input{
+ flex:1;
+ padding:12px;
+ border-radius:25px;
+ border:1px solid #333;
+ background:#1a1a1a;
+ color:white;
+ outline:none;
+}
+</style>
 </head>
+
 <body>
 
-<div id="loader"><div class="logo-text" style="font-size: 2rem;">Pwice</div></div>
+<div id="loader"><div class="logo-text">Pwice</div></div>
 
-<div id="auth-page" class="hidden" style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
-    <div class="logo-text">Pwice</div>
-    <div style="background:var(--pw-card); padding:30px; border-radius:20px; width:100%; max-width:350px; text-align:center;">
-        <input type="email" id="u-email" placeholder="Email" style="width:100%; padding:14px; margin:10px 0; background:#1a1a1a; border:1px solid #333; color:white; border-radius:10px;">
-        <input type="password" id="u-pass" placeholder="Password" style="width:100%; padding:14px; margin:10px 0; background:#1a1a1a; border:1px solid #333; color:white; border-radius:10px;">
-        <button onclick="handleAuth()" style="width:100%; padding:14px; background:var(--pw-blue); color:white; border:none; border-radius:10px; font-weight:bold;">Login</button>
-    </div>
+<!-- AUTH -->
+<div id="auth-page" class="hidden">
+ <div class="logo-text">Pwice</div>
+ <div style="background:var(--pw-card);padding:30px;border-radius:20px;width:100%;max-width:350px;">
+  <input id="u-email" placeholder="Email">
+  <input id="u-pass" type="password" placeholder="Password">
+  <button onclick="handleAuth()" style="width:100%;padding:14px;background:var(--pw-blue);border:none;border-radius:10px;color:white;font-weight:bold">Login</button>
+ </div>
 </div>
 
+<!-- MAIN -->
 <div id="main-app" class="hidden">
-    <nav id="top-nav">
-        <div class="logo-text" style="font-size: 1.8rem; margin: 0;">Pwice</div>
-        <button class="chat-icon-btn" onclick="switchTab('chat')">✉️</button>
-    </nav>
 
-    <div id="feed-view" class="view-container"></div>
+<nav id="top-nav">
+ <div class="logo-text" style="font-size:1.6rem">Pwice</div>
+ <button class="chat-icon-btn" onclick="switchTab('chat')">✉️</button>
+</nav>
 
-    <div id="chat-view" class="view-container hidden">
-        <div style="padding:15px; border-bottom:1px solid #262626; display:flex; align-items:center; gap:15px;">
-            <span onclick="switchTab('feed')" style="font-size:1.5rem; cursor:pointer; padding:5px;">⬅️</span> <b>Chats</b>
-        </div>
-        <div class="message-box" id="msg-list"></div>
-        <div class="chat-input-area">
-            <input type="text" id="chat-input" class="chat-input" placeholder="Message...">
-            <button onclick="sendMsg()" style="color:var(--pw-blue); background:none; border:none; font-weight:bold; padding:0 10px;">Send</button>
-        </div>
-    </div>
+<div id="feed-view" class="view-container"></div>
 
-    <div id="profile-view" class="view-container hidden" style="text-align:center; padding-top:50px;">
-        <h3 id="p-name"></h3>
-        <button onclick="logout()" style="background:#e74c3c; color:white; border:none; padding:10px 20px; border-radius:8px;">Logout</button>
-    </div>
+<!-- CHAT -->
+<div id="chat-view" class="hidden">
+ <div class="chat-header">
+  <span style="cursor:pointer;font-size:1.5rem" onclick="switchTab('feed')">⬅️</span>
+  <b>Chats</b>
+ </div>
 
-    <div class="bottom-bar" id="bottom-nav">
-        <div onclick="switchTab('feed')">🏠</div>
-        <div onclick="switchTab('profile')">👤</div>
-    </div>
+ <div id="msg-list" class="message-box"></div>
+
+ <div class="chat-input-area">
+  <input id="chat-input" class="chat-input" placeholder="Message...">
+  <button onclick="sendMsg()" style="color:var(--pw-blue);background:none;border:none;font-weight:bold">Send</button>
+ </div>
+</div>
+
+<div id="profile-view" class="view-container hidden" style="text-align:center;padding-top:50px">
+ <h3 id="p-name"></h3>
+ <button onclick="logout()" style="background:#e74c3c;color:white;border:none;padding:10px 20px;border-radius:8px">Logout</button>
+</div>
+
+<div id="bottom-nav" class="bottom-bar">
+ <div onclick="switchTab('feed')">🏠</div>
+ <div onclick="switchTab('profile')">👤</div>
+</div>
+
 </div>
 
 <script>
-    const supabaseUrl = 'https://xgxmbfbuplkzwnrueusy.supabase.co'; 
-    const supabaseKey = 'sb_publishable_W-5nmUs4gRcD0BDsv7BM9w_R6rpx87j'; 
-    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseUrl='https://xgxmbfbuplkzwnrueusy.supabase.co';
+const supabaseKey='sb_publishable_W-5nmUs4gRcD0BDsv7BM9w_R6rpx87j';
+const _supabase=supabase.createClient(supabaseUrl,supabaseKey);
 
-    async function init() {
-        const { data: { session } } = await _supabase.auth.getSession();
-        updateUI(session);
-        document.getElementById('loader').classList.add('hidden');
-    }
+let msgSubscribed=false;
 
-    _supabase.auth.onAuthStateChange((_e, session) => updateUI(session));
+async function init(){
+ const {data:{session}}=await _supabase.auth.getSession();
+ updateUI(session);
+ document.getElementById('loader').classList.add('hidden');
+}
 
-    function updateUI(session) {
-        if (session) {
-            document.getElementById('auth-page').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('p-name').innerText = session.user.email;
-            fetchFeed();
-            listenMessages(session.user.id);
-        } else {
-            document.getElementById('auth-page').classList.remove('hidden');
-            document.getElementById('main-app').classList.add('hidden');
-        }
-    }
+_supabase.auth.onAuthStateChange((_e,session)=>updateUI(session));
 
-    function switchTab(tab) {
-        document.getElementById('feed-view').classList.add('hidden');
-        document.getElementById('chat-view').classList.add('hidden');
-        document.getElementById('profile-view').classList.add('hidden');
-        document.getElementById('top-nav').classList.remove('hidden');
-        document.getElementById('bottom-nav').classList.remove('hidden');
+function updateUI(session){
+ if(session){
+  auth-page.classList.add('hidden');
+  main-app.classList.remove('hidden');
+  p-name.innerText=session.user.email;
+  fetchFeed();
+  listenMessages(session.user.id);
+ }else{
+  auth-page.classList.remove('hidden');
+  main-app.classList.add('hidden');
+ }
+}
 
-        if(tab === 'feed') document.getElementById('feed-view').classList.remove('hidden');
-        if(tab === 'profile') document.getElementById('profile-view').classList.remove('hidden');
-        if(tab === 'chat') {
-            document.getElementById('chat-view').classList.remove('hidden');
-            document.getElementById('top-nav').classList.add('hidden');
-            document.getElementById('bottom-nav').classList.add('hidden');
-        }
-    }
+function switchTab(tab){
+ ['feed-view','profile-view','chat-view'].forEach(v=>document.getElementById(v).classList.add('hidden'));
+ top-nav.classList.remove('hidden');
+ bottom-nav.classList.remove('hidden');
 
-    function listenMessages(uid) {
-        _supabase.channel('messages').on('postgres_changes', { event: 'INSERT', table: 'messages' }, payload => {
-            const list = document.getElementById('msg-list');
-            const isSent = payload.new.sender_id === uid;
-            list.innerHTML += `<div class="msg ${isSent ? 'sent' : 'received'}">${payload.new.text}</div>`;
-            list.scrollTop = list.scrollHeight;
-        }).subscribe();
-    }
+ if(tab==='feed')feed-view.classList.remove('hidden');
+ if(tab==='profile')profile-view.classList.remove('hidden');
+ if(tab==='chat'){
+  chat-view.classList.remove('hidden');
+  top-nav.classList.add('hidden');
+  bottom-nav.classList.add('hidden');
+ }
+}
 
-    async function sendMsg() {
-        const input = document.getElementById('chat-input');
-        const { data: { user } } = await _supabase.auth.getUser();
-        if(!input.value.trim() || !user) return;
-        await _supabase.from('messages').insert([{ 
-            sender_id: user.id, 
-            receiver_id: user.id, // self-chat for testing
-            text: input.value 
-        }]);
-        input.value = '';
-    }
+function listenMessages(uid){
+ if(msgSubscribed)return;
+ msgSubscribed=true;
 
-    async function fetchFeed() {
-        const { data } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
-        const feed = document.getElementById('feed-view'); feed.innerHTML = '';
-        data?.forEach(p => feed.innerHTML += `<div style="padding:15px; border-bottom: 1px solid #1a1a1a;"><img src="${p.image_url}" style="width:100%; border-radius:12px;"></div>`);
-    }
+ _supabase.channel('messages')
+ .on('postgres_changes',{event:'INSERT',table:'messages'},payload=>{
+  const isSent=payload.new.sender_id===uid;
+  msg-list.innerHTML+=`<div class="msg ${isSent?'sent':'received'}">${payload.new.text}</div>`;
+  msg-list.scrollTop=msg-list.scrollHeight;
+ }).subscribe();
+}
 
-    async function handleAuth() {
-        const email = document.getElementById('u-email').value;
-        const pass = document.getElementById('u-pass').value;
-        await _supabase.auth.signInWithPassword({ email, password: pass });
-    }
+async function sendMsg(){
+ const input=chat-input;
+ const {data:{user}}=await _supabase.auth.getUser();
+ if(!input.value.trim())return;
+ await _supabase.from('messages').insert([{sender_id:user.id,receiver_id:user.id,text:input.value}]);
+ input.value='';
+}
 
-    async function logout() { await _supabase.auth.signOut(); }
+async function fetchFeed(){
+ const {data}=await _supabase.from('posts').select('*').order('created_at',{ascending:false});
+ feed-view.innerHTML='';
+ data?.forEach(p=>{
+  feed-view.innerHTML+=`<div style="padding:15px"><img src="${p.image_url}" style="width:100%;border-radius:12px"></div>`;
+ });
+}
 
-    window.onload = init;
+async function handleAuth(){
+ await _supabase.auth.signInWithPassword({
+  email:u-email.value,
+  password:u-pass.value
+ });
+}
+
+async function logout(){await _supabase.auth.signOut()}
+
+window.onload=init;
 </script>
+
 </body>
 </html>
