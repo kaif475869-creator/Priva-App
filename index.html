@@ -5,72 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pwice - Global Private Connect</title>
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#000000">
     <link rel="icon" type="image/png" href="/favicon.png">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
         :root { --pw-blue: #0095f6; --pw-dark: #000000; --pw-card: #1c1c1e; --pw-text: #ffffff; --pw-grad: linear-gradient(to right, #80d0ff, #b399ff, #d9b3ff); }
         body { margin: 0; font-family: -apple-system, sans-serif; background: var(--pw-dark); color: var(--pw-text); overflow: hidden; }
         .hidden { display: none !important; }
-        
-        /* 🔥 Stylish Logo */
-        .logo-text { 
-            font-size: 3.5rem; font-weight: 900; font-style: italic; display: inline-block;
-            background: var(--pw-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            letter-spacing: -2px; font-family: 'Arial Black', sans-serif; padding-right: 25px; line-height: 1.2;
-        }
-
-        /* Loading Screen (Fixed logout issue) */
+        .logo-text { font-size: 3.5rem; font-weight: 900; font-style: italic; display: inline-block; background: var(--pw-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px; padding-right: 25px; line-height: 1.2; }
         #loader { height: 100vh; display: flex; justify-content: center; align-items: center; background: #000; position: fixed; width: 100%; z-index: 9999; }
-
-        /* App Layout */
         nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pw-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 12px 0; font-size: 1.6rem; z-index: 100; }
         .view-container { height: calc(100vh - 120px); overflow-y: auto; }
-
-        /* Modal & UI */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: flex-end; }
-        .modal-content { background: var(--pw-card); width: 100%; border-radius: 25px 25px 0 0; padding: 30px 20px; }
-        .modal-input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; background: #2c2c2e; border: 1px solid #333; color: white; box-sizing: border-box; }
-        .btn-main { width: 100%; padding: 14px; background: var(--pw-blue); border: none; color: white; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        
+        /* Advance Chat UI */
+        .message-box { padding: 15px; display: flex; flex-direction: column; gap: 8px; height: calc(100% - 70px); overflow-y: auto; }
+        .msg { max-width: 70%; padding: 10px 14px; border-radius: 18px; font-size: 0.95rem; position: relative; }
+        .msg.sent { align-self: flex-end; background: var(--pw-blue); border-bottom-right-radius: 4px; }
+        .msg.received { align-self: flex-start; background: #262626; border-bottom-left-radius: 4px; }
+        .seen-status { font-size: 0.7rem; color: #8e8e8e; align-self: flex-end; margin-top: -5px; margin-right: 5px; }
+        .typing-indicator { font-size: 0.8rem; color: #0095f6; padding: 5px 15px; font-style: italic; }
+        
+        .chat-input-area { position: fixed; bottom: 0; width: 100%; background: #000; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #262626; }
+        .chat-input { flex: 1; background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px 18px; border-radius: 25px; outline: none; }
     </style>
 </head>
 <body>
 
-<div id="loader">
-    <div class="logo-text" style="font-size: 2.5rem;">Pwice</div>
-</div>
+<div id="loader"><div class="logo-text" style="font-size: 2.5rem;">Pwice</div></div>
 
 <div id="auth-page" class="hidden" style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
     <div class="logo-text">Pwice</div>
-    <div class="login-card" style="background:var(--pw-card); padding:30px; border-radius:20px; width:100%; max-width:350px; text-align:center; border:1px solid #262626;">
-        <h2 id="form-title">Login</h2>
-        <input type="email" id="u-email" placeholder="Email Address" class="modal-input">
-        <input type="password" id="u-pass" placeholder="Password" class="modal-input">
-        <button onclick="handleAuth()" class="btn-main">Login</button>
-        <p style="margin-top:20px; color:#8e8e8e; font-size:0.9rem;">No account? <span style="color:var(--pw-blue); cursor:pointer;" onclick="toggleForm()">Signup</span></p>
+    <div style="background:var(--pw-card); padding:30px; border-radius:20px; width:100%; max-width:350px; text-align:center;">
+        <input type="email" id="u-email" placeholder="Email" style="width:100%; padding:14px; margin:10px 0; border-radius:10px; background:#1a1a1a; border:1px solid #333; color:white;">
+        <input type="password" id="u-pass" placeholder="Password" style="width:100%; padding:14px; margin:10px 0; border-radius:10px; background:#1a1a1a; border:1px solid #333; color:white;">
+        <button onclick="handleAuth()" style="width:100%; padding:14px; background:var(--pw-blue); border:none; color:white; border-radius:10px; font-weight:bold;">Login</button>
     </div>
 </div>
 
 <div id="main-app" class="hidden">
-    <nav>
-        <div class="logo-text" style="font-size: 1.8rem; margin: 0;">Pwice</div>
-        <div style="font-size: 1.4rem;"><span onclick="switchTab('chat')">✉️</span></div>
-    </nav>
+    <nav><div class="logo-text" style="font-size: 1.8rem; margin: 0;">Pwice</div><div onclick="switchTab('chat')" style="cursor:pointer;">✉️</div></nav>
+    
     <div id="feed-view" class="view-container"></div>
+
     <div id="chat-view" class="view-container hidden">
-        <div style="padding:15px; border-bottom:1px solid #262626;"><span onclick="switchTab('feed')">⬅️</span> <b>Direct Messages</b></div>
-        <div id="msg-list" style="padding:15px;"></div>
+        <div style="padding:15px; border-bottom:1px solid #262626; display:flex; justify-content:space-between;">
+            <span onclick="switchTab('feed')">⬅️ <b>Direct</b></span>
+            <span id="seen-label" style="font-size:0.8rem; color:#8e8e8e;"></span>
+        </div>
+        <div class="message-box" id="msg-list"></div>
+        <div id="typing-status" class="typing-indicator hidden">Typing...</div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" class="chat-input" placeholder="Message..." oninput="sendTyping()">
+            <button onclick="sendMsg()" style="color:var(--pw-blue); background:none; border:none; font-weight:bold; padding-right:10px;">Send</button>
+        </div>
     </div>
-    <div id="profile-view" class="view-container hidden" style="text-align:center; padding-top:40px;">
-        <img src="https://via.placeholder.com/150" style="width:100px; border-radius:50%;" id="p-img">
-        <h3 id="p-name">Loading Profile...</h3>
-        <button onclick="logout()" style="background:#e74c3c; border:none; color:white; padding:10px 20px; border-radius:8px;">Logout</button>
-    </div>
-    <div class="bottom-bar">
+
+    <div class="bottom-bar" id="nav-bar">
         <span onclick="switchTab('feed')">🏠</span>
-        <span onclick="openUpload()">➕</span>
+        <span onclick="alert('Search coming soon!')">🔍</span>
         <span onclick="switchTab('profile')">👤</span>
     </div>
 </div>
@@ -80,24 +72,22 @@
     const supabaseKey = 'sb_publishable_W-5nmUs4gRcD0BDsv7BM9w_R6rpx87j'; 
     const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    let isLoginMode = true;
+    let currentUser = null;
+    let typingTimeout;
 
-    // ✅ FIXED REFRESH LOGOUT (Asynchronous check)
-    async function initApp() {
+    async function init() {
         const { data: { session } } = await _supabase.auth.getSession();
-        renderView(session);
-        document.getElementById('loader').classList.add('hidden'); // Sirf tabhi loader hatega jab check ho jaye
+        updateUI(session);
+        document.getElementById('loader').classList.add('hidden');
     }
 
-    _supabase.auth.onAuthStateChange((_event, session) => {
-        renderView(session);
-    });
+    _supabase.auth.onAuthStateChange((_e, session) => updateUI(session));
 
-    function renderView(session) {
+    function updateUI(session) {
+        currentUser = session?.user;
         if (session) {
             document.getElementById('auth-page').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('p-name').innerText = session.user.email;
             fetchFeed();
         } else {
             document.getElementById('auth-page').classList.remove('hidden');
@@ -105,30 +95,33 @@
         }
     }
 
-    // Initialize checking on load
-    window.addEventListener('DOMContentLoaded', initApp);
-
-    async function handleAuth() {
-        const email = document.getElementById('u-email').value;
-        const pass = document.getElementById('u-pass').value;
-        if(isLoginMode) {
-            const { error } = await _supabase.auth.signInWithPassword({ email, password: pass });
-            if(error) alert(error.message);
-        } else {
-            const { error } = await _supabase.auth.signUp({ email, password: pass });
-            if(error) alert(error.message); else alert("Check email for OTP!");
-        }
-    }
-
-    function toggleForm() {
-        isLoginMode = !isLoginMode;
-        document.getElementById('form-title').innerText = isLoginMode ? "Login" : "Sign Up";
-    }
-
     function switchTab(tab) {
         document.getElementById('feed-view').classList.toggle('hidden', tab !== 'feed');
         document.getElementById('chat-view').classList.toggle('hidden', tab !== 'chat');
-        document.getElementById('profile-view').classList.toggle('hidden', tab !== 'profile');
+        document.getElementById('nav-bar').classList.toggle('hidden', tab === 'chat');
+        if(tab === 'chat') markSeen();
+    }
+
+    // Typing Feature
+    function sendTyping() {
+        // Realtime signal yahan jayega (requires Presence)
+        console.log("Typing...");
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => { /* stop typing */ }, 2000);
+    }
+
+    function sendMsg() {
+        const input = document.getElementById('chat-input');
+        if(!input.value) return;
+        const list = document.getElementById('msg-list');
+        list.innerHTML += `<div class="msg sent">${input.value}</div>`;
+        list.innerHTML += `<div class="seen-status">Delivered</div>`;
+        input.value = '';
+        list.scrollTop = list.scrollHeight;
+    }
+
+    function markSeen() {
+        document.getElementById('seen-label').innerText = "Seen just now";
     }
 
     async function fetchFeed() {
@@ -137,7 +130,13 @@
         data?.forEach(p => feed.innerHTML += `<div style="padding:15px; border-bottom:1px solid #1a1a1a;"><img src="${p.image_url}" style="width:100%; border-radius:12px;"></div>`);
     }
 
-    async function logout() { await _supabase.auth.signOut(); }
+    async function handleAuth() {
+        const email = document.getElementById('u-email').value;
+        const pass = document.getElementById('u-pass').value;
+        await _supabase.auth.signInWithPassword({ email, password: pass });
+    }
+
+    window.onload = init;
 </script>
 </body>
 </html>
