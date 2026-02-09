@@ -19,11 +19,12 @@
         .toggle-text { margin-top: 20px; font-size: 0.9rem; color: #8e8e8e; }
         .toggle-text span { color: var(--pw-blue); cursor: pointer; font-weight: bold; }
         .logo-text { font-size: 3rem; font-weight: bold; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; }
+        
+        /* Main App Styles */
         nav { background: var(--pw-dark); border-bottom: 1px solid #262626; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .reels-container { height: calc(100vh - 120px); overflow-y: scroll; scroll-snap-type: y mandatory; }
         .reel-video { height: 100%; width: 100%; scroll-snap-align: start; position: relative; background: #1a1a1a; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #333; }
         .reel-overlay { position: absolute; bottom: 20px; left: 15px; text-shadow: 1px 1px 5px rgba(0,0,0,0.8); z-index: 10; }
-        .post-img { width: 100%; height: 100%; object-fit: cover; }
         .bottom-bar { position: fixed; bottom: 0; width: 100%; background: var(--pw-dark); border-top: 1px solid #262626; display: flex; justify-content: space-around; padding: 15px 0; font-size: 1.4rem; z-index: 100; }
         span { cursor: pointer; }
     </style>
@@ -32,13 +33,22 @@
 
 <div id="auth-page" class="auth-box">
     <div class="logo-text">Pwice</div>
-    <div class="login-card">
+    
+    <div id="auth-form" class="login-card">
         <h2 id="form-title">Login</h2>
         <input type="text" id="u-fullname" class="hidden" placeholder="Full Name">
         <input type="text" id="u-contact" placeholder="Mobile Number or Email">
-        <input type="password" id="u-pass" placeholder="Password">
+        <input type="password" id="u-pass" placeholder="Create Password">
         <button class="btn-main" id="auth-btn" onclick="handleAuth()">Login</button>
         <p class="toggle-text" id="toggle-msg">Don't have an account? <span onclick="toggleForm()">Create Account</span></p>
+    </div>
+
+    <div id="otp-screen" class="login-card hidden">
+        <h2>Enter OTP</h2>
+        <p style="font-size: 0.8rem; color: #8e8e8e;">Humein aapke contact par 6-digit code bheja hai.</p>
+        <input type="number" id="otp-input" placeholder="000000" style="text-align: center; letter-spacing: 5px; font-size: 1.5rem;">
+        <button class="btn-main" onclick="verifyOTP()">Verify & Finish</button>
+        <p class="toggle-text"><span onclick="location.reload()">Back to Login</span></p>
     </div>
 </div>
 
@@ -64,6 +74,7 @@
     const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
     let isLogin = true;
+    let tempUserData = null; // OTP verify hone tak data yahan rahega
 
     function toggleForm() {
         isLogin = !isLogin;
@@ -80,72 +91,68 @@
         const contact = document.getElementById('u-contact').value;
         const pass = document.getElementById('u-pass').value;
 
-        if(!contact || !pass) { alert("Sari details bhariye bhai!"); return; }
+        if(!contact || !pass) { alert("Bhai, sari details bhariye!"); return; }
 
         if (!isLogin) {
-            const { data, error } = await _supabase.from('Users').insert([{ full_name: fullName, contact: contact, password: pass }]);
-            if (error) { alert("Error: " + error.message); } 
-            else { alert("Pwice ID Ban gayi! 🎉"); loginSuccess(); }
+            // STEP: Signup - Pehle OTP screen dikhao
+            tempUserData = { full_name: fullName, contact: contact, password: pass };
+            document.getElementById('auth-form').classList.add('hidden');
+            document.getElementById('otp-screen').classList.remove('hidden');
+            console.log("OTP Sent to:", contact); // Fake simulation for now
         } else {
+            // STEP: Login
             const { data, error } = await _supabase.from('Users').select('*').eq('contact', contact).eq('password', pass).single();
-            if (data) { loginSuccess(); } else { alert("Wrong details! Check mobile/password."); }
+            if (data) { loginSuccess(); } else { alert("Galat details! Sahi password dalo."); }
+        }
+    }
+
+    async function verifyOTP() {
+        const otp = document.getElementById('otp-input').value;
+        
+        // Abhi ke liye humne '123456' ko default OTP rakha hai testing ke liye
+        if(otp === "123456") {
+            const { data, error } = await _supabase.from('Users').insert([tempUserData]);
+            if (error) { 
+                alert("Database Error: " + error.message); 
+            } else {
+                alert("OTP Verified! Pwice ID Ban gayi. 🎉");
+                loginSuccess();
+            }
+        } else {
+            alert("Galat OTP! Sahi code dalo bhai.");
         }
     }
 
     function loginSuccess() {
         document.getElementById('auth-page').classList.add('hidden');
         document.getElementById('main-app').classList.remove('hidden');
-        fetchPosts(); // Login hote hi posts dikhao
+        fetchPosts();
     }
 
-    // NAYA: Database se posts load karne ka system
     async function fetchPosts() {
         const { data, error } = await _supabase.from('posts').select('*').order('created_at', { ascending: false });
-        
-        if (error) {
-            console.error("Fetch Error:", error);
-            return;
-        }
-
         const reelsList = document.getElementById('reels-list');
-        reelsList.innerHTML = ''; // Loading text hatao
+        reelsList.innerHTML = ''; 
 
-        if (data.length === 0) {
-            reelsList.innerHTML = '<div class="reel-video">Abhi koi post nahi hai. Pehle aap dalo! ➕</div>';
-            return;
+        if (data && data.length > 0) {
+            data.forEach(post => {
+                reelsList.innerHTML += `
+                    <div class="reel-video">
+                        <img src="${post.image_url}" style="width:100%; height:100%; object-fit:cover;">
+                        <div class="reel-overlay"><b>@Pwice_User</b><br>${post.caption || ''}</div>
+                    </div>`;
+            });
+        } else {
+            reelsList.innerHTML = '<div class="reel-video">No posts yet. ➕</div>';
         }
-
-        data.forEach(post => {
-            const postElement = document.createElement('div');
-            postElement.className = 'reel-video';
-            postElement.innerHTML = `
-                <img src="${post.image_url}" class="post-img" onerror="this.src='https://via.placeholder.com/400x700?text=No+Image'">
-                <div class="reel-overlay">
-                    <b>@Pwice_User</b><br>
-                    ${post.caption || 'No caption'}
-                </div>
-            `;
-            reelsList.appendChild(postElement);
-        });
     }
 
-    // NAYA: Post upload karne ka feature
     async function uploadPost() {
-        const imageUrl = prompt("Photo ka URL dalo (Instagram se link copy karke check karo):");
-        const caption = prompt("Kuch caption likhna hai?");
-
+        const imageUrl = prompt("Image URL dalo:");
+        const caption = prompt("Caption likho:");
         if (!imageUrl) return;
-
-        const { data, error } = await _supabase.from('posts').insert([
-            { image_url: imageUrl, caption: caption }
-        ]);
-
-        if (error) {
-            alert("Upload failed: " + error.message);
-        } else {
-            alert("Post ho gaya! 🔥");
-            fetchPosts(); // Nayi post turant dikhao
-        }
+        const { error } = await _supabase.from('posts').insert([{ image_url: imageUrl, caption: caption }]);
+        if (!error) { fetchPosts(); }
     }
 </script>
 </body>
